@@ -3,7 +3,7 @@ import { cardLayoutOptions, cardRatioOptions } from '../utils'
 function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-semibold text-white">{label}</span>
       {children}
     </label>
   )
@@ -13,7 +13,7 @@ export default function CardStyleControls({ card, onChange }) {
   return (
     <div className="space-y-5">
       <Field label="Card layout">
-        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white/[0.06] p-1">
           {cardLayoutOptions.map((option) => (
             <button
               key={option.value}
@@ -21,8 +21,8 @@ export default function CardStyleControls({ card, onChange }) {
               onClick={() => onChange({ layout: option.value })}
               className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
                 card.layout === option.value
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-500'
+                  ? 'bg-cyan-300 text-slate-950'
+                  : 'text-slate-200'
               }`}
             >
               {option.label}
@@ -35,7 +35,7 @@ export default function CardStyleControls({ card, onChange }) {
         <select
           value={card.ratio}
           onChange={(event) => onChange({ ratio: event.target.value })}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none"
+          className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
         >
           {cardRatioOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -52,12 +52,12 @@ export default function CardStyleControls({ card, onChange }) {
           max="64"
           value={card.borderRadius}
           onChange={(event) => onChange({ borderRadius: Number(event.target.value) })}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
 
       <Field label="Shadow strength">
-        <div className="grid grid-cols-3 gap-2 rounded-2xl bg-slate-100 p-1">
+        <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/[0.06] p-1">
           {['soft', 'medium', 'strong'].map((shadow) => (
             <button
               key={shadow}
@@ -65,8 +65,8 @@ export default function CardStyleControls({ card, onChange }) {
               onClick={() => onChange({ shadow })}
               className={`rounded-2xl px-3 py-2 text-sm font-semibold capitalize transition ${
                 card.shadow === shadow
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-500'
+                  ? 'bg-cyan-300 text-slate-950'
+                  : 'text-slate-200'
               }`}
             >
               {shadow}
@@ -82,7 +82,7 @@ export default function CardStyleControls({ card, onChange }) {
           max="56"
           value={card.padding}
           onChange={(event) => onChange({ padding: Number(event.target.value) })}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
 
@@ -94,7 +94,7 @@ export default function CardStyleControls({ card, onChange }) {
           step="0.02"
           value={card.transparency}
           onChange={(event) => onChange({ transparency: Number(event.target.value) })}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
     </div>

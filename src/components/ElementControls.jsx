@@ -1,7 +1,7 @@
 function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-semibold text-white">{label}</span>
       {children}
     </label>
   )
@@ -18,32 +18,33 @@ export default function ElementControls({
 }) {
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-        Press <span className="font-semibold text-slate-900">Delete</span> or{' '}
-        <span className="font-semibold text-slate-900">Backspace</span> to remove
-        the selected layer. Right-click anywhere on the preview to jump back here.
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white">
+        Press <span className="font-semibold text-cyan-200">Delete</span> to remove
+        the selected layer. <span className="font-semibold text-cyan-200">Backspace</span>{' '}
+        stays available for editing text content. Right-click anywhere on the preview
+        to jump back here.
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
           onClick={onAddText}
-          className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+          className="rounded-2xl border border-cyan-300/35 bg-cyan-300/18 px-4 py-3 text-sm font-semibold text-cyan-50 transition hover:-translate-y-0.5 hover:bg-cyan-300/24"
         >
           Add Text
         </button>
-        <label className="grid cursor-pointer place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400">
+        <label className="grid cursor-pointer place-items-center rounded-2xl border border-dashed border-white/20 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:border-white/35">
           Add Image
           <input type="file" accept="image/*" className="hidden" onChange={onAddImage} />
         </label>
       </div>
 
       {selectedElement ? (
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
           <button
             type="button"
             onClick={onDelete}
-            className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
+            className="w-full rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200"
           >
             Delete Selected Element
           </button>
@@ -61,12 +62,12 @@ export default function ElementControls({
                       radius: Number(event.target.value),
                     })
                   }
-                  className="w-full accent-slate-900"
+                  className="w-full accent-cyan-300"
                 />
               </Field>
 
               <Field label="Resize mode">
-                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-1">
+                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white/[0.06] p-1">
                   {[
                     { label: 'Ratio', value: 'ratio' },
                     { label: 'Side', value: 'side' },
@@ -77,8 +78,8 @@ export default function ElementControls({
                       onClick={() => onElementChange({ resizeMode: mode.value })}
                       className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
                         (selectedElement.resizeMode ?? 'ratio') === mode.value
-                          ? 'bg-slate-900 text-white'
-                          : 'text-slate-500'
+                          ? 'bg-cyan-300 text-slate-950'
+                          : 'text-slate-200'
                       }`}
                     >
                       {mode.label}
@@ -104,7 +105,7 @@ export default function ElementControls({
                         height: Math.max(8, Math.min(90, next * ratio)),
                       })
                     }}
-                    className="w-full accent-slate-900"
+                    className="w-full accent-cyan-300"
                   />
                 </Field>
               ) : (
@@ -118,7 +119,7 @@ export default function ElementControls({
                       onChange={(event) =>
                         onElementChange({ width: Number(event.target.value) })
                       }
-                      className="w-full accent-slate-900"
+                      className="w-full accent-cyan-300"
                     />
                   </Field>
                   <Field label={`Height: ${Math.round(selectedElement.height)}%`}>
@@ -130,7 +131,7 @@ export default function ElementControls({
                       onChange={(event) =>
                         onElementChange({ height: Number(event.target.value) })
                       }
-                      className="w-full accent-slate-900"
+                      className="w-full accent-cyan-300"
                     />
                   </Field>
                 </div>
@@ -152,8 +153,8 @@ export default function ElementControls({
                 onClick={() => onSelect(element.id)}
                 className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${
                   isActive
-                    ? 'border-slate-900 bg-slate-900 text-white'
-                    : 'border-slate-200 bg-white text-slate-600'
+                    ? 'border-cyan-300/45 bg-cyan-300/18 text-white'
+                    : 'border-white/10 bg-white/[0.05] text-white'
                 }`}
               >
                 <span className="font-semibold capitalize">{element.type}</span>

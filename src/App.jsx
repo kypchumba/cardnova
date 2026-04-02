@@ -18,7 +18,8 @@ import {
   reorderElements,
 } from './utils'
 
-const STORAGE_KEY = 'business-card-generator-design'
+const STORAGE_KEY = 'business-card-generator-design-v2'
+const LEGACY_STORAGE_KEY = 'business-card-generator-design'
 
 const randomPalettes = [
   {
@@ -47,10 +48,36 @@ const randomPalettes = [
   },
 ]
 
+function isLegacyStarterDesign(design) {
+  const texts = Array.isArray(design?.elements)
+    ? design.elements
+        .filter((element) => element?.type === 'text')
+        .map((element) => String(element.text || ''))
+    : []
+
+  return texts.some(
+    (text) =>
+      text.includes('Ava Brooks') ||
+      text.includes('ava@studio.com') ||
+      text.includes('Creative Director'),
+  )
+}
+
 function loadInitialDesign() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : defaultDesign
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      return isLegacyStarterDesign(parsed) ? defaultDesign : parsed
+    }
+
+    const legacySaved = localStorage.getItem(LEGACY_STORAGE_KEY)
+    if (legacySaved) {
+      const parsedLegacy = JSON.parse(legacySaved)
+      return isLegacyStarterDesign(parsedLegacy) ? defaultDesign : parsedLegacy
+    }
+
+    return defaultDesign
   } catch {
     return defaultDesign
   }
@@ -112,6 +139,7 @@ export default function App() {
   useEffect(() => {
     designRef.current = design
     localStorage.setItem(STORAGE_KEY, JSON.stringify(design))
+    localStorage.removeItem(LEGACY_STORAGE_KEY)
   }, [design])
 
   useEffect(() => {
@@ -134,28 +162,15 @@ export default function App() {
 
   useEffect(() => {
     function handleKeyDown(event) {
-      const activeElement = document.activeElement
-      const isTypingTarget =
-        activeElement instanceof HTMLElement &&
-        (activeElement.isContentEditable ||
-          ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName))
-
       if (!selectedId) {
         return
       }
 
-      const isDeleteKey =
-        event.key === 'Delete' ||
-        event.key === 'Backspace' ||
-        event.code === 'Delete' ||
-        event.code === 'Backspace'
+      const isDeleteKey = event.key === 'Delete' || event.code === 'Delete'
 
       if (isDeleteKey) {
-        if (isTypingTarget || editingTextId) {
-          return
-        }
-
         event.preventDefault()
+        event.stopPropagation()
         deleteSelectedElement()
         setActiveSection('elements')
       }
@@ -163,7 +178,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown, true)
     return () => window.removeEventListener('keydown', handleKeyDown, true)
-  }, [selectedId, editingTextId, design.elements])
+  }, [selectedId, design.elements])
 
   function commitChange(updater) {
     setDesign((current) => {
@@ -556,7 +571,7 @@ export default function App() {
     {
       id: 'background',
       title: 'Background Settings',
-      subtitle: 'Solid fills, gradients, imagery, and mood',
+      subtitle: 'Solid fills, gradients, imagery and mood',
       content: (
         <BackgroundControls
           background={design.background}
@@ -581,7 +596,7 @@ export default function App() {
     {
       id: 'elements',
       title: 'Element Controls',
-      subtitle: 'Add, select, and manage your freeform layers',
+      subtitle: 'Add, select and manage your freeform layers',
       content: (
         <ElementControls
           elements={design.elements}
@@ -597,7 +612,7 @@ export default function App() {
     {
       id: 'card',
       title: 'Card Styling',
-      subtitle: 'Shape, depth, padding, and transparency',
+      subtitle: 'Shape, depth, padding and transparency',
       content: (
         <CardStyleControls
           card={design.card}
@@ -634,7 +649,7 @@ export default function App() {
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-base">
               Drag text and images anywhere inside the canvas, fine-tune every
-              layer, and export the finished card exactly as it appears.
+              layer and export the finished card exactly as it appears.
             </p>
           </div>
 
@@ -653,7 +668,7 @@ export default function App() {
           id="workspace"
           className="grid min-h-[calc(100vh-2rem)] items-stretch gap-5 lg:h-[calc(100vh-2rem)] lg:grid-cols-[380px_minmax(0,1fr)]"
         >
-          <div className="hidden h-full min-h-0 lg:block">
+          <div className="hidden min-h-0 lg:block lg:h-[calc(100%+6.5rem)]">
             <Sidebar
               sections={sections}
               activeSection={activeSection}
@@ -668,7 +683,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(true)}
-                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/88 text-slate-900 shadow-panel backdrop-blur-xl"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white bg-white text-slate-900 shadow-panel"
                 aria-label="Open settings"
               >
                 <Menu size={20} />
@@ -737,13 +752,13 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(false)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/70 bg-white/88 text-slate-900 shadow-panel backdrop-blur-xl"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white bg-white text-slate-900 shadow-panel"
                 aria-label="Close settings"
               >
                 <X size={18} />
               </button>
             </div>
-            <div className="max-h-[calc(100dvh-5.5rem)] overflow-hidden">
+            <div className="max-h-[calc(100dvh-5.5rem)] overflow-y-auto overscroll-contain">
               <Sidebar
                 sections={sections}
                 activeSection={activeSection}

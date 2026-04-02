@@ -15,7 +15,7 @@ export default function Sidebar({
           Customize every part of your card
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Fine-tune every layer, keep the preview visible, and export exactly
+          Fine-tune every layer, keep the preview visible and export exactly
           what you see.
         </p>
       </div>

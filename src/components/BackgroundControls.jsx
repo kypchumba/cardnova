@@ -3,7 +3,7 @@ import { gradientDirections } from '../utils'
 function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-semibold text-white">{label}</span>
       {children}
     </label>
   )
@@ -12,7 +12,7 @@ function Field({ label, children }) {
 export default function BackgroundControls({ background, onChange, onImageUpload }) {
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-slate-100 p-1">
+      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/[0.06] p-1">
         {['solid', 'gradient', 'image'].map((type) => (
           <button
             key={type}
@@ -20,8 +20,8 @@ export default function BackgroundControls({ background, onChange, onImageUpload
             onClick={() => onChange({ type })}
             className={`rounded-2xl px-3 py-2 text-sm font-semibold capitalize transition ${
               background.type === type
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-500'
+                ? 'bg-cyan-300 text-slate-950 shadow-sm'
+                : 'text-slate-200'
             }`}
           >
             {type}
@@ -35,7 +35,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
             type="color"
             value={background.solidColor}
             onChange={(event) => onChange({ solidColor: event.target.value })}
-            className="h-12 w-full rounded-2xl border border-slate-200 bg-transparent"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-transparent"
           />
         </Field>
       ) : null}
@@ -56,7 +56,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
                     ],
                   })
                 }
-                className="h-12 w-full rounded-2xl border border-slate-200 bg-transparent"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-transparent"
               />
             </Field>
             <Field label="Color two">
@@ -72,17 +72,17 @@ export default function BackgroundControls({ background, onChange, onImageUpload
                     ],
                   })
                 }
-                className="h-12 w-full rounded-2xl border border-slate-200 bg-transparent"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-transparent"
               />
             </Field>
           </div>
 
-          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-3 py-3 text-sm font-medium text-slate-600">
+          <label className="flex items-center gap-3 rounded-2xl border border-white/10 px-3 py-3 text-sm font-medium text-white">
             <input
               type="checkbox"
               checked={background.useThirdColor}
               onChange={(event) => onChange({ useThirdColor: event.target.checked })}
-              className="h-4 w-4 rounded border-slate-300 text-slate-900"
+              className="h-4 w-4 rounded border-white/20 text-cyan-300"
             />
             Add a third gradient color
           </label>
@@ -101,7 +101,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
                     ],
                   })
                 }
-                className="h-12 w-full rounded-2xl border border-slate-200 bg-transparent"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-transparent"
               />
             </Field>
           ) : null}
@@ -112,7 +112,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
               onChange={(event) =>
                 onChange({ gradientDirection: event.target.value })
               }
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none"
+              className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
             >
               {gradientDirections.map((direction) => (
                 <option key={direction.value} value={direction.value}>
@@ -130,7 +130,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
             type="file"
             accept="image/*"
             onChange={onImageUpload}
-            className="block w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-500"
+            className="block w-full rounded-2xl border border-dashed border-white/20 bg-white/[0.04] px-4 py-4 text-sm text-white"
           />
         </Field>
       ) : null}
@@ -142,7 +142,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
           max="28"
           value={background.blur}
           onChange={(event) => onChange({ blur: Number(event.target.value) })}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
 
@@ -150,7 +150,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
         <select
           value={background.overlay}
           onChange={(event) => onChange({ overlay: event.target.value })}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none"
+          className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
         >
           <option value="none">None</option>
           <option value="dark">Dark glow</option>
@@ -166,7 +166,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
           step="0.05"
           value={background.opacity}
           onChange={(event) => onChange({ opacity: Number(event.target.value) })}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
     </div>

@@ -3,7 +3,7 @@ import { fontOptions } from '../utils'
 function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-semibold text-cyan-100">{label}</span>
+      <span className="text-sm font-semibold text-white">{label}</span>
       {children}
     </label>
   )
@@ -30,7 +30,7 @@ export default function TextControls({
               onGlobalChange({ fontFamily: value })
             }
           }}
-          className="w-full rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 text-sm text-white outline-none"
+          className="w-full rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
         >
           {fontOptions.map((font) => (
             <option key={font.value} value={font.value}>
