@@ -6,9 +6,7 @@
 
 :root {
   color: #172033;
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 30%),
-    linear-gradient(180deg, #f8f4ec 0%, #e9eef3 100%);
+  background: #020617;
   font-family: 'Manrope', sans-serif;
 }
 
@@ -19,14 +17,13 @@ body,
   min-height: 100%;
 }
 
-body {
-  margin: 0;
+html {
+  scroll-behavior: smooth;
 }
 
-@media (min-width: 1024px) {
-  body {
-    overflow: hidden;
-  }
+body {
+  margin: 0;
+  background: #020617;
 }
 
 * {

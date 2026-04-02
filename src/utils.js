@@ -1,3 +1,5 @@
+import defaultUserImage from './assets/cardnova-user.png'
+
 export const fontOptions = [
   { label: 'Sora', value: 'Sora, sans-serif' },
   { label: 'Manrope', value: 'Manrope, sans-serif' },
@@ -27,6 +29,7 @@ export const cardLayoutOptions = [
 
 export const cardRatioOptions = [
   { label: '1:1', value: '1:1', width: 1, height: 1 },
+  { label: '4:3', value: '4:3', width: 4, height: 3 },
   { label: '4:5', value: '4:5', width: 4, height: 5 },
   { label: '3:4', value: '3:4', width: 3, height: 4 },
   { label: '16:9', value: '16:9', width: 16, height: 9 },
@@ -35,31 +38,31 @@ export const cardRatioOptions = [
 
 export const defaultDesign = {
   background: {
-    type: 'solid',
-    solidColor: '#f7f3ec',
-    gradientColors: ['#102542', '#0f766e', '#f59e0b'],
-    gradientDirection: '135deg',
+    type: 'gradient',
+    solidColor: '#5b4f85',
+    gradientColors: ['#484480', '#704a79', '#b74a43'],
+    gradientDirection: '115deg',
     useThirdColor: true,
     image: '',
     blur: 0,
-    overlay: 'dark',
+    overlay: 'none',
     opacity: 1,
   },
   text: {
     fontFamily: 'Sora, sans-serif',
-    fontSize: 42,
+    fontSize: 32,
     fontWeight: 700,
     color: '#ffffff',
     letterSpacing: 0,
-    lineHeight: 1.1,
+    lineHeight: 1.2,
   },
   card: {
     layout: 'horizontal',
-    ratio: '1:1',
-    borderRadius: 32,
+    ratio: '4:3',
+    borderRadius: 40,
     shadow: 'medium',
-    padding: 28,
-    transparency: 0.12,
+    padding: 34,
+    transparency: 0,
   },
   export: {
     highResolution: true,
@@ -67,33 +70,75 @@ export const defaultDesign = {
   },
   elements: [
     {
-      id: 'text-1',
+      id: 'image-hero',
+      type: 'image',
+      src: defaultUserImage,
+      alt: 'Default Cardnova preview avatar',
+      x: 3.5,
+      y: 4.5,
+      width: 26,
+      height: 35,
+      radius: 999,
+      resizeMode: 'ratio',
+    },
+    {
+      id: 'text-brand',
       type: 'text',
-      text: 'Ava Brooks',
-      x: 12,
-      y: 68,
+      text: 'Cardnova',
+      x: 16.5,
+      y: 28,
       width: 68,
       fontFamily: 'Sora, sans-serif',
-      fontSize: 56,
-      fontWeight: 700,
-      color: '#ffffff',
-      letterSpacing: -1,
-      lineHeight: 0.98,
+      fontSize: 86,
+      fontWeight: 800,
+      color: '#fff500',
+      letterSpacing: -4,
+      lineHeight: 0.92,
       align: 'left',
     },
     {
-      id: 'text-2',
+      id: 'text-headline',
       type: 'text',
-      text: 'Creative Director\nava@studio.com',
-      x: 12,
-      y: 82,
-      width: 44,
+      text: 'Welcomes you to digital business card designing',
+      x: 7.5,
+      y: 56,
+      width: 78,
       fontFamily: 'Manrope, sans-serif',
-      fontSize: 19,
+      fontSize: 29,
+      fontWeight: 800,
+      color: '#fff9fb',
+      letterSpacing: -1.2,
+      lineHeight: 1.12,
+      align: 'left',
+    },
+    {
+      id: 'text-subhead',
+      type: 'text',
+      text: 'Feel free to design, save and share your card with clients',
+      x: 10.6,
+      y: 66.5,
+      width: 72,
+      fontFamily: 'Manrope, sans-serif',
+      fontSize: 18,
       fontWeight: 600,
-      color: '#e5f4f3',
-      letterSpacing: 0.8,
-      lineHeight: 1.4,
+      color: '#fff8fb',
+      letterSpacing: 0,
+      lineHeight: 1.26,
+      align: 'left',
+    },
+    {
+      id: 'text-note',
+      type: 'text',
+      text: 'This product is still being optimized for smooth user interface. Please\nif you encounter any error while designing report it to\nchumbakenny@gmail.com or visit kypchumba.github.io to report',
+      x: 3.8,
+      y: 80,
+      width: 90,
+      fontFamily: 'Manrope, sans-serif',
+      fontSize: 17,
+      fontWeight: 700,
+      color: '#fff9fb',
+      letterSpacing: -0.2,
+      lineHeight: 1.46,
       align: 'left',
     },
   ],
@@ -127,8 +172,8 @@ export function reorderElements(elements, id, direction) {
 
   const targetIndex =
     direction === 'forward'
-      ? clamp(index + 1, 0, elements.length - 1)
-      : clamp(index - 1, 0, elements.length - 1)
+      ? elements.length - 1
+      : 0
 
   if (targetIndex === index) {
     return elements

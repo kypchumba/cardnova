@@ -3,7 +3,7 @@ import { fontOptions } from '../utils'
 function Field({ label, children }) {
   return (
     <label className="block space-y-2">
-      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <span className="text-sm font-semibold text-cyan-100">{label}</span>
       {children}
     </label>
   )
@@ -30,7 +30,7 @@ export default function TextControls({
               onGlobalChange({ fontFamily: value })
             }
           }}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none"
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 text-sm text-white outline-none"
         >
           {fontOptions.map((font) => (
             <option key={font.value} value={font.value}>
@@ -54,13 +54,13 @@ export default function TextControls({
               onGlobalChange({ fontSize: value })
             }
           }}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Weight">
-          <div className="grid grid-cols-3 gap-2 rounded-2xl bg-slate-100 p-1">
+          <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/[0.06] p-1">
             {[400, 500, 600, 700, 800].map((weight) => (
               <button
                 key={weight}
@@ -74,8 +74,8 @@ export default function TextControls({
                 }}
                 className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
                   target.fontWeight === weight
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-500'
+                    ? 'bg-cyan-300 text-slate-950'
+                    : 'text-slate-200'
                 }`}
               >
                 {weight}
@@ -96,7 +96,7 @@ export default function TextControls({
                 onGlobalChange({ color: value })
               }
             }}
-            className="h-12 w-full rounded-2xl border border-slate-200 bg-transparent"
+            className="h-12 w-full rounded-2xl border border-white/10 bg-transparent"
           />
         </Field>
       </div>
@@ -116,7 +116,7 @@ export default function TextControls({
               onGlobalChange({ letterSpacing: value })
             }
           }}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
 
@@ -135,7 +135,7 @@ export default function TextControls({
               onGlobalChange({ lineHeight: value })
             }
           }}
-          className="w-full accent-slate-900"
+          className="w-full accent-cyan-300"
         />
       </Field>
 
@@ -145,11 +145,11 @@ export default function TextControls({
             rows="4"
             value={selectedElement.text}
             onChange={(event) => onElementChange({ text: event.target.value })}
-            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none"
+            className="w-full rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 text-sm text-white outline-none"
           />
         </Field>
       ) : (
-        <p className="rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-500">
+        <p className="rounded-2xl bg-white/[0.06] px-4 py-3 text-sm text-slate-200">
           Select a text layer to edit its content directly. Otherwise, these
           settings become the default for newly added text.
         </p>

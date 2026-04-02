@@ -59,6 +59,7 @@ export default function Canvas({
   contextMenu,
   onCloseContextMenu,
   onAddText,
+  onAddImage,
   onDeleteSelected,
   onBringForward,
   onSendBackward,
@@ -89,6 +90,10 @@ export default function Canvas({
           aspectRatio: ratioValue,
         }
 
+  function isBlankCanvasEventTarget(target) {
+    return !(target instanceof Element) || !target.closest('[data-layer-root="true"]')
+  }
+
   return (
     <div className="flex min-h-[30rem] flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/60 bg-white/50 p-4 shadow-panel backdrop-blur-xl lg:p-5">
         <div
@@ -98,15 +103,23 @@ export default function Canvas({
             maxWidth: '1120px',
           }}
         >
-        <div className="absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),rgba(255,255,255,0.2)_55%,rgba(226,232,240,0.55))]" />
         <div
           ref={canvasRef}
           role="presentation"
-          onClick={() => {
+          onClick={(event) => {
+            if (!isBlankCanvasEventTarget(event.target)) {
+              return
+            }
+
+            onStopEditing?.()
             onSelect(null)
             onCloseContextMenu?.()
           }}
           onContextMenu={(event) => {
+            if (!isBlankCanvasEventTarget(event.target)) {
+              return
+            }
+
             event.preventDefault()
             onContextMenu?.(null, event.clientX, event.clientY)
           }}
@@ -124,7 +137,7 @@ export default function Canvas({
           }}
         >
           <div
-            className="absolute inset-0"
+            className="pointer-events-none absolute inset-0"
             style={{
               ...backgroundStyle,
               filter:
@@ -139,14 +152,14 @@ export default function Canvas({
           />
 
           <div
-            className="absolute inset-0"
+            className="pointer-events-none absolute inset-0"
             style={{
               backgroundColor: `rgba(255,255,255,${design.card.transparency})`,
             }}
           />
 
           {design.background.overlay !== 'none' ? (
-            <div className={`absolute inset-0 ${getOverlayClass(design.background.overlay)}`} />
+            <div className={`pointer-events-none absolute inset-0 ${getOverlayClass(design.background.overlay)}`} />
           ) : null}
 
           <div
@@ -197,6 +210,7 @@ export default function Canvas({
             position={contextMenu.position}
             selectedElement={contextMenu.targetId ? design.elements.find((element) => element.id === contextMenu.targetId) : null}
             onAddText={onAddText}
+            onAddImage={onAddImage}
             onDelete={onDeleteSelected}
             onBringForward={onBringForward}
             onSendBackward={onSendBackward}

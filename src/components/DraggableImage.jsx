@@ -135,6 +135,7 @@ export default function DraggableImage({
 
   return (
     <div
+      data-layer-root="true"
       role="presentation"
       onPointerDown={startMove}
       onClick={(event) => {

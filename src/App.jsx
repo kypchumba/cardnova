@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, startTransition } from 'react'
 import { toBlob } from 'html-to-image'
-import { Menu, X } from 'lucide-react'
+import { ArrowDown, Menu, X } from 'lucide-react'
 import BackgroundControls from './components/BackgroundControls'
 import Canvas from './components/Canvas'
 import CardStyleControls from './components/CardStyleControls'
@@ -102,6 +102,7 @@ export default function App() {
     targetId: null,
   })
   const canvasRef = useRef(null)
+  const quickImageInputRef = useRef(null)
   const designRef = useRef(design)
   const interactionSnapshotRef = useRef(null)
 
@@ -133,26 +134,36 @@ export default function App() {
 
   useEffect(() => {
     function handleKeyDown(event) {
-      const target = event.target
+      const activeElement = document.activeElement
       const isTypingTarget =
-        target instanceof HTMLElement &&
-        (target.isContentEditable ||
-          ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+        activeElement instanceof HTMLElement &&
+        (activeElement.isContentEditable ||
+          ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName))
 
-      if (isTypingTarget || !selectedId) {
+      if (!selectedId) {
         return
       }
 
-      if (event.key === 'Delete' || event.key === 'Backspace') {
+      const isDeleteKey =
+        event.key === 'Delete' ||
+        event.key === 'Backspace' ||
+        event.code === 'Delete' ||
+        event.code === 'Backspace'
+
+      if (isDeleteKey) {
+        if (isTypingTarget || editingTextId) {
+          return
+        }
+
         event.preventDefault()
         deleteSelectedElement()
         setActiveSection('elements')
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedId, design.elements])
+    window.addEventListener('keydown', handleKeyDown, true)
+    return () => window.removeEventListener('keydown', handleKeyDown, true)
+  }, [selectedId, editingTextId, design.elements])
 
   function commitChange(updater) {
     setDesign((current) => {
@@ -313,6 +324,10 @@ export default function App() {
     setEditingTextId(null)
     event.target.value = ''
     pushToast('Image layer added', 'The uploaded image is now on the card.')
+  }
+
+  function openQuickImagePicker() {
+    quickImageInputRef.current?.click()
   }
 
   async function updateBackgroundImage(event) {
@@ -606,47 +621,61 @@ export default function App() {
   ]
 
   return (
-    <main className="min-h-screen px-4 py-4 text-ink lg:h-screen lg:overflow-hidden lg:px-6">
+    <main className="min-h-screen bg-slate-950 px-4 py-4 text-white lg:px-6">
       <ToastStack toasts={toasts} />
-      <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-[1680px] items-stretch gap-5 lg:h-[calc(100vh-2rem)] lg:overflow-hidden lg:grid-cols-[380px_minmax(0,1fr)]">
-        <div className="hidden h-full min-h-0 lg:block">
-          <Sidebar
-            sections={sections}
-            activeSection={activeSection}
-            onSectionChange={(sectionId) =>
-              setActiveSection((current) => (current === sectionId ? null : sectionId))
-            }
-          />
-        </div>
-
-        <section className="scrollbar-thin flex h-full min-h-[calc(100vh-2rem)] min-w-0 flex-col gap-5 lg:min-h-0 lg:overflow-y-auto lg:pr-2">
-          <div className="fixed left-6 top-6 z-40 lg:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileSidebarOpen(true)}
-              className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/88 text-slate-900 shadow-panel backdrop-blur-xl"
-              aria-label="Open settings"
-            >
-              <Menu size={20} />
-            </button>
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-6">
+        <section className="flex min-h-[calc(100vh-2rem)] flex-col justify-between px-1 pb-4 pt-2">
+          <div className="max-w-4xl pt-16 lg:pt-24">
+            <p className="font-display text-xs uppercase tracking-[0.36em] text-slate-400">
+              Business Card Generator
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white lg:text-5xl">
+              Design a polished card in real time
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-base">
+              Drag text and images anywhere inside the canvas, fine-tune every
+              layer, and export the finished card exactly as it appears.
+            </p>
           </div>
 
-          <div className="rounded-[2rem] border border-white/60 bg-white/55 p-5 shadow-panel backdrop-blur-xl">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="pl-16 lg:pl-0">
-                <p className="font-display text-xs uppercase tracking-[0.3em] text-teal-700">
-                  Live Preview
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-900">
-                  Freeform editor with instant feedback
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Drag text and images anywhere inside the square canvas, resize
-                  selected layers, and export the finished card without leaving
-                  the page.
-                </p>
-              </div>
+          <div className="flex justify-start">
+            <a
+              href="#workspace"
+              className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10"
+            >
+              Scroll to workspace
+              <ArrowDown size={16} />
+            </a>
+          </div>
+        </section>
 
+        <section
+          id="workspace"
+          className="grid min-h-[calc(100vh-2rem)] items-stretch gap-5 lg:h-[calc(100vh-2rem)] lg:grid-cols-[380px_minmax(0,1fr)]"
+        >
+          <div className="hidden h-full min-h-0 lg:block">
+            <Sidebar
+              sections={sections}
+              activeSection={activeSection}
+              onSectionChange={(sectionId) =>
+                setActiveSection((current) => (current === sectionId ? null : sectionId))
+              }
+            />
+          </div>
+
+          <section className="flex min-h-0 min-w-0 flex-col gap-5 lg:h-full">
+            <div className="sticky left-0 top-6 z-40 flex lg:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileSidebarOpen(true)}
+                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/88 text-slate-900 shadow-panel backdrop-blur-xl"
+                aria-label="Open settings"
+              >
+                <Menu size={20} />
+              </button>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-4 shadow-panel backdrop-blur-sm">
               <ToolbarControls
                 onUndo={handleUndo}
                 onRedo={handleRedo}
@@ -659,31 +688,42 @@ export default function App() {
                 onExport={exportCard}
               />
             </div>
-          </div>
 
-          <Canvas
-            design={design}
-            selectedId={selectedId}
-            editingTextId={editingTextId}
-            onSelect={selectElement}
-            onStartEditing={setEditingTextId}
-            onStopEditing={() => setEditingTextId(null)}
-            canvasRef={canvasRef}
-            onPreviewElementChange={previewElementChange}
-            onCommitElementChange={commitInteraction}
-            onTextInput={previewTextInput}
-            onContextMenu={openElementControls}
-            contextMenu={contextMenu}
-            onCloseContextMenu={() =>
-              setContextMenu((current) => ({ ...current, visible: false }))
-            }
-            onAddText={addTextElement}
-            onDeleteSelected={deleteSelectedElement}
-            onBringForward={() => reorderSelected('forward')}
-            onSendBackward={() => reorderSelected('backward')}
-          />
+            <div className="min-h-0 flex-1">
+              <Canvas
+                design={design}
+                selectedId={selectedId}
+                editingTextId={editingTextId}
+                onSelect={selectElement}
+                onStartEditing={setEditingTextId}
+                onStopEditing={() => setEditingTextId(null)}
+                canvasRef={canvasRef}
+                onPreviewElementChange={previewElementChange}
+                onCommitElementChange={commitInteraction}
+                onTextInput={previewTextInput}
+                onContextMenu={openElementControls}
+                contextMenu={contextMenu}
+                onCloseContextMenu={() =>
+                  setContextMenu((current) => ({ ...current, visible: false }))
+                }
+                onAddText={addTextElement}
+                onAddImage={openQuickImagePicker}
+                onDeleteSelected={deleteSelectedElement}
+                onBringForward={() => reorderSelected('forward')}
+                onSendBackward={() => reorderSelected('backward')}
+              />
+            </div>
+          </section>
         </section>
       </div>
+
+      <input
+        ref={quickImageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={addImageElement}
+      />
 
       {mobileSidebarOpen ? (
         <div className="fixed inset-0 z-50 bg-slate-950/28 backdrop-blur-[2px] lg:hidden">

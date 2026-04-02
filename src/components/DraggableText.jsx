@@ -1,22 +1,5 @@
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { clamp } from '../utils'
-
-function ResizeHandle({ direction, onPointerDown, className }) {
-  return (
-    <button
-      type="button"
-      data-resize-handle="true"
-      data-export-ignore="true"
-      onPointerDown={(event) => onPointerDown(event, direction)}
-      className={`absolute z-10 bg-transparent ${className}`}
-      aria-label={`Resize ${direction}`}
-    />
-  )
-}
-
-function countLines(text) {
-  return Math.max(1, text.split('\n').length)
-}
 
 export default function DraggableText({
   element,
@@ -34,6 +17,8 @@ export default function DraggableText({
   const textareaRef = useRef(null)
   const measureRef = useRef(null)
   const elementRef = useRef(null)
+  const caretRef = useRef({ start: null, end: null })
+  const [boxSize, setBoxSize] = useState({ width: 32, height: 32 })
 
   useEffect(() => {
     if (!selected || !isEditing || !textareaRef.current) {
@@ -41,23 +26,45 @@ export default function DraggableText({
     }
 
     textareaRef.current.focus()
-    const length = textareaRef.current.value.length
-    textareaRef.current.setSelectionRange(length, length)
   }, [selected, isEditing])
 
   useLayoutEffect(() => {
-    if (!selected || !measureRef.current || !textareaRef.current) {
+    if (!selected || !isEditing || !textareaRef.current) {
+      return
+    }
+
+    const textarea = textareaRef.current
+    const { start, end } = caretRef.current
+
+    if (
+      document.activeElement === textarea &&
+      start !== null &&
+      end !== null &&
+      start <= textarea.value.length &&
+      end <= textarea.value.length
+    ) {
+      textarea.setSelectionRange(start, end)
+    }
+  }, [selected, isEditing, element.text])
+
+  useLayoutEffect(() => {
+    if (!measureRef.current) {
       return
     }
 
     const measureRect = measureRef.current.getBoundingClientRect()
-    const nextWidth = Math.max(measureRect.width + 8, 24)
-    const nextHeight = Math.max(measureRect.height + 6, element.fontSize * element.lineHeight)
+    const nextWidth = Math.max(Math.ceil(measureRect.width), 8)
+    const nextHeight = Math.max(
+      Math.ceil(measureRect.height),
+      Math.ceil(element.fontSize * element.lineHeight),
+    )
 
-    textareaRef.current.style.width = `${nextWidth}px`
-    textareaRef.current.style.height = `${nextHeight}px`
+    setBoxSize((current) =>
+      current.width === nextWidth && current.height === nextHeight
+        ? current
+        : { width: nextWidth, height: nextHeight },
+    )
   }, [
-    selected,
     element.text,
     element.fontFamily,
     element.fontSize,
@@ -82,7 +89,7 @@ export default function DraggableText({
   }
 
   function startMove(event) {
-    if (isEditing || event.target.closest('[data-resize-handle="true"], [data-move-handle="true"]')) {
+    if (isEditing) {
       return
     }
 
@@ -97,10 +104,19 @@ export default function DraggableText({
     const startX = event.clientX
     const startY = event.clientY
     const initial = { x: element.x, y: element.y }
+    let hasDragged = false
 
     function handleMove(moveEvent) {
       const deltaX = ((moveEvent.clientX - startX) / bounds.canvasRect.width) * 100
       const deltaY = ((moveEvent.clientY - startY) / bounds.canvasRect.height) * 100
+      const movedEnough =
+        Math.abs(moveEvent.clientX - startX) > 3 || Math.abs(moveEvent.clientY - startY) > 3
+
+      if (!movedEnough && !hasDragged) {
+        return
+      }
+
+      hasDragged = true
 
       onPreviewChange(element.id, {
         x: clamp(initial.x + deltaX, 0, 100 - bounds.widthPercent),
@@ -109,53 +125,11 @@ export default function DraggableText({
     }
 
     function handleUp() {
-      onCommitChange()
-      window.removeEventListener('pointermove', handleMove)
-      window.removeEventListener('pointerup', handleUp)
-    }
-
-    window.addEventListener('pointermove', handleMove)
-    window.addEventListener('pointerup', handleUp)
-  }
-
-  function startResize(event, direction) {
-    event.stopPropagation()
-    onSelect(element.id)
-
-    const canvasRect = canvasRef.current?.getBoundingClientRect()
-    if (!canvasRect) {
-      return
-    }
-
-    const startX = event.clientX
-    const startY = event.clientY
-    const initialX = element.x
-    const initialY = element.y
-    const initialFontSize = element.fontSize
-
-    function handleMove(moveEvent) {
-      const deltaX = ((moveEvent.clientX - startX) / canvasRect.width) * 100
-      const deltaY = ((moveEvent.clientY - startY) / canvasRect.height) * 100
-      const next = {}
-
-      if (direction.includes('right')) {
-        next.fontSize = clamp(initialFontSize + deltaX * 0.95, 12, 140)
+      if (!hasDragged) {
+        onStartEditing(element.id)
+      } else {
+        onCommitChange()
       }
-
-      if (direction.includes('left')) {
-        next.fontSize = clamp(initialFontSize - deltaX * 0.95, 12, 140)
-        next.x = clamp(initialX + deltaX, 0, 96)
-      }
-
-      if (direction.includes('top')) {
-        next.y = clamp(initialY + deltaY, 0, 96)
-      }
-
-      onPreviewChange(element.id, next)
-    }
-
-    function handleUp() {
-      onCommitChange()
       window.removeEventListener('pointermove', handleMove)
       window.removeEventListener('pointerup', handleUp)
     }
@@ -167,30 +141,23 @@ export default function DraggableText({
   return (
     <div
       ref={elementRef}
+      data-layer-root="true"
       role="presentation"
       onPointerDown={startMove}
       onClick={(event) => {
         event.stopPropagation()
-        if (!selected) {
-          onSelect(element.id)
-          return
-        }
-
-        if (!isEditing) {
-          onStartEditing(element.id)
-        }
       }}
       onContextMenu={(event) => {
         event.preventDefault()
         event.stopPropagation()
         onContextMenu?.(element.id, event.clientX, event.clientY)
       }}
-      className={`group absolute transition ${
-        selected ? 'ring-2 ring-white/85 ring-offset-2 ring-offset-slate-900/30' : ''
-      }`}
+      className="absolute"
       style={{
         left: `${element.x}%`,
         top: `${element.y}%`,
+        width: `${boxSize.width}px`,
+        height: `${boxSize.height}px`,
         color: element.color,
         fontFamily: element.fontFamily,
         fontSize: `${element.fontSize}px`,
@@ -200,106 +167,106 @@ export default function DraggableText({
         whiteSpace: 'pre',
       }}
     >
-      {selected && isEditing ? (
-        <>
-          <textarea
-            ref={textareaRef}
-            value={element.text}
-            wrap="off"
-            rows={countLines(element.text)}
-            onPointerDown={(event) => {
-              event.stopPropagation()
-              onSelect(element.id)
-            }}
-            onChange={(event) => onTextInput(element.id, event.target.value)}
-            onBlur={() => {
-              onStopEditing()
-              onCommitChange()
-            }}
-            className="min-h-[1.2em] min-w-[1ch] resize-none overflow-hidden bg-transparent p-0 outline-none"
-            style={{
-              color: element.color,
-              fontFamily: element.fontFamily,
-              fontSize: `${element.fontSize}px`,
-              fontWeight: element.fontWeight,
-              letterSpacing: `${element.letterSpacing}px`,
-              lineHeight: element.lineHeight,
-              whiteSpace: 'pre',
-            }}
-          />
+      {selected ? (
+        <div className="pointer-events-none absolute inset-0 border-2 border-white/85" />
+      ) : null}
 
-          <div
-            ref={measureRef}
-            aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 -z-10 opacity-0"
-            style={{
-              fontFamily: element.fontFamily,
-              fontSize: `${element.fontSize}px`,
-              fontWeight: element.fontWeight,
-              letterSpacing: `${element.letterSpacing}px`,
-              lineHeight: element.lineHeight,
-              whiteSpace: 'pre',
-            }}
-          >
-            {element.text || ' '}
-          </div>
-        </>
+      {selected && isEditing ? (
+        <textarea
+          ref={textareaRef}
+          value={element.text}
+          wrap="off"
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+          onPointerDown={(event) => {
+            event.stopPropagation()
+            onSelect(element.id)
+          }}
+          onClick={(event) => {
+            event.stopPropagation()
+            const target = event.currentTarget
+            caretRef.current = {
+              start: target.selectionStart,
+              end: target.selectionEnd,
+            }
+          }}
+          onKeyUp={(event) => {
+            const target = event.currentTarget
+            caretRef.current = {
+              start: target.selectionStart,
+              end: target.selectionEnd,
+            }
+          }}
+          onSelect={(event) => {
+            const target = event.currentTarget
+            caretRef.current = {
+              start: target.selectionStart,
+              end: target.selectionEnd,
+            }
+          }}
+          onChange={(event) => {
+            const target = event.currentTarget
+            caretRef.current = {
+              start: target.selectionStart,
+              end: target.selectionEnd,
+            }
+            onTextInput(element.id, target.value)
+          }}
+          onBlur={() => {
+            caretRef.current = { start: null, end: null }
+            onStopEditing()
+            onCommitChange()
+          }}
+          className="resize-none overflow-hidden bg-transparent p-0 outline-none"
+          style={{
+            width: '100%',
+            height: '100%',
+            color: element.color,
+            caretColor: element.color,
+            cursor: 'text',
+            fontFamily: element.fontFamily,
+            fontSize: `${element.fontSize}px`,
+            fontWeight: element.fontWeight,
+            letterSpacing: `${element.letterSpacing}px`,
+            lineHeight: element.lineHeight,
+            whiteSpace: 'pre',
+            display: 'block',
+          }}
+        />
       ) : (
-        <div className="cursor-crosshair whitespace-pre">{element.text}</div>
+        <div
+          className="h-full w-full cursor-move whitespace-pre"
+          style={{
+            color: element.color,
+            fontFamily: element.fontFamily,
+            fontSize: `${element.fontSize}px`,
+            fontWeight: element.fontWeight,
+            letterSpacing: `${element.letterSpacing}px`,
+            lineHeight: element.lineHeight,
+          }}
+        >
+          {element.text}
+        </div>
       )}
 
-      {selected ? (
-        <>
-          <ResizeHandle
-            direction="top"
-            onPointerDown={startResize}
-            className="-top-1 left-2 right-2 h-2 cursor-n-resize"
-          />
-          <ResizeHandle
-            direction="right"
-            onPointerDown={startResize}
-            className="bottom-2 -right-1 top-2 w-2 cursor-e-resize"
-          />
-          <ResizeHandle
-            direction="bottom"
-            onPointerDown={startResize}
-            className="-bottom-1 left-2 right-2 h-2 cursor-s-resize"
-          />
-          <ResizeHandle
-            direction="left"
-            onPointerDown={startResize}
-            className="bottom-2 -left-1 top-2 w-2 cursor-w-resize"
-          />
-          <ResizeHandle
-            direction="top-right"
-            onPointerDown={startResize}
-            className="-right-1 -top-1 h-3 w-3 cursor-ne-resize"
-          />
-          <ResizeHandle
-            direction="top-left"
-            onPointerDown={startResize}
-            className="-left-1 -top-1 h-3 w-3 cursor-nw-resize"
-          />
-          <ResizeHandle
-            direction="bottom-right"
-            onPointerDown={startResize}
-            className="-right-1 -bottom-1 h-3 w-3 cursor-se-resize"
-          />
-          <ResizeHandle
-            direction="bottom-left"
-            onPointerDown={startResize}
-            className="-left-1 -bottom-1 h-3 w-3 cursor-sw-resize"
-          />
-          <button
-            type="button"
-            data-move-handle="true"
-            data-export-ignore="true"
-            onPointerDown={startMove}
-            className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full border-2 border-white bg-slate-900 shadow-lg transition hover:scale-110 active:scale-95"
-            aria-label="Move text"
-          />
-        </>
-      ) : null}
+      <div
+        ref={measureRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute left-0 top-0 -z-10 opacity-0"
+        style={{
+          fontFamily: element.fontFamily,
+          fontSize: `${element.fontSize}px`,
+          fontWeight: element.fontWeight,
+          letterSpacing: `${element.letterSpacing}px`,
+          lineHeight: element.lineHeight,
+          whiteSpace: 'pre',
+          display: 'inline-block',
+          width: 'max-content',
+        }}
+      >
+        {element.text || ' '}
+      </div>
     </div>
   )
 }

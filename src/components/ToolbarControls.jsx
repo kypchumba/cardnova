@@ -6,7 +6,7 @@ function ActionButton({ icon: Icon, label, onClick, disabled = false }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-4 py-2 text-sm font-semibold text-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.12] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
     >
       <Icon size={16} />
       {label}
@@ -45,7 +45,7 @@ export default function ToolbarControls({
       <button
         type="button"
         onClick={onExport}
-        className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5"
+        className="inline-flex items-center gap-2 rounded-full border border-cyan-300/35 bg-cyan-300/18 px-5 py-2.5 text-sm font-semibold text-cyan-50 shadow-soft transition hover:-translate-y-0.5 hover:bg-cyan-300/24"
       >
         <Download size={16} />
         Export PNG

@@ -3,6 +3,7 @@ export default function FloatingContextMenu({
   position,
   selectedElement,
   onAddText,
+  onAddImage,
   onDelete,
   onBringForward,
   onSendBackward,
@@ -18,7 +19,10 @@ export default function FloatingContextMenu({
         { label: 'Send Backward', onClick: onSendBackward },
         { label: 'Delete Layer', onClick: onDelete, danger: true },
       ]
-    : [{ label: 'Add Text Layer', onClick: onAddText }]
+    : [
+        { label: 'Add Text Layer', onClick: onAddText },
+        { label: 'Add Image Layer', onClick: onAddImage },
+      ]
 
   return (
     <div
