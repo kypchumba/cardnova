@@ -165,6 +165,9 @@ export default function DraggableText({
         letterSpacing: `${element.letterSpacing}px`,
         lineHeight: element.lineHeight,
         whiteSpace: 'pre',
+        fontKerning: 'none',
+        fontVariantLigatures: 'none',
+        textRendering: 'geometricPrecision',
       }}
     >
       {selected ? (
@@ -232,6 +235,9 @@ export default function DraggableText({
             lineHeight: element.lineHeight,
             whiteSpace: 'pre',
             display: 'block',
+            fontKerning: 'none',
+            fontVariantLigatures: 'none',
+            textRendering: 'geometricPrecision',
           }}
         />
       ) : (
@@ -244,6 +250,9 @@ export default function DraggableText({
             fontWeight: element.fontWeight,
             letterSpacing: `${element.letterSpacing}px`,
             lineHeight: element.lineHeight,
+            fontKerning: 'none',
+            fontVariantLigatures: 'none',
+            textRendering: 'geometricPrecision',
           }}
         >
           {element.text}
@@ -263,6 +272,9 @@ export default function DraggableText({
           whiteSpace: 'pre',
           display: 'inline-block',
           width: 'max-content',
+          fontKerning: 'none',
+          fontVariantLigatures: 'none',
+          textRendering: 'geometricPrecision',
         }}
       >
         {element.text || ' '}

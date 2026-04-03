@@ -18,8 +18,60 @@ import {
   reorderElements,
 } from './utils'
 
-const STORAGE_KEY = 'business-card-generator-design-v2'
+const STORAGE_KEY = 'business-card-generator-design-v3'
 const LEGACY_STORAGE_KEY = 'business-card-generator-design'
+const LEGACY_STORAGE_KEY_V2 = 'business-card-generator-design-v2'
+
+function normalizeDesign(design) {
+  if (!design || typeof design !== 'object') {
+    return defaultDesign
+  }
+
+  const merged = {
+    ...defaultDesign,
+    ...design,
+    background: {
+      ...defaultDesign.background,
+      ...(design.background ?? {}),
+    },
+    text: {
+      ...defaultDesign.text,
+      ...(design.text ?? {}),
+    },
+    card: {
+      ...defaultDesign.card,
+      ...(design.card ?? {}),
+    },
+    export: {
+      ...defaultDesign.export,
+      ...(design.export ?? {}),
+    },
+    elements: Array.isArray(design.elements) ? design.elements : defaultDesign.elements,
+  }
+
+  return {
+    ...merged,
+    elements: merged.elements.map((element) => {
+      if (element?.type !== 'text') {
+        return element
+      }
+
+      return {
+        ...element,
+        fontFamily:
+          element.fontFamily ?? defaultDesign.text.fontFamily,
+        letterSpacing:
+          typeof element.letterSpacing === 'number'
+            ? element.letterSpacing
+            : defaultDesign.text.letterSpacing,
+        lineHeight:
+          typeof element.lineHeight === 'number'
+            ? element.lineHeight
+            : defaultDesign.text.lineHeight,
+      }
+    }),
+  }
+}
 
 const randomPalettes = [
   {
@@ -67,13 +119,19 @@ function loadInitialDesign() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
-      const parsed = JSON.parse(saved)
+      const parsed = normalizeDesign(JSON.parse(saved))
       return isLegacyStarterDesign(parsed) ? defaultDesign : parsed
+    }
+
+    const savedV2 = localStorage.getItem(LEGACY_STORAGE_KEY_V2)
+    if (savedV2) {
+      const parsedV2 = normalizeDesign(JSON.parse(savedV2))
+      return isLegacyStarterDesign(parsedV2) ? defaultDesign : parsedV2
     }
 
     const legacySaved = localStorage.getItem(LEGACY_STORAGE_KEY)
     if (legacySaved) {
-      const parsedLegacy = JSON.parse(legacySaved)
+      const parsedLegacy = normalizeDesign(JSON.parse(legacySaved))
       return isLegacyStarterDesign(parsedLegacy) ? defaultDesign : parsedLegacy
     }
 
@@ -139,6 +197,7 @@ export default function App() {
   useEffect(() => {
     designRef.current = design
     localStorage.setItem(STORAGE_KEY, JSON.stringify(design))
+    localStorage.removeItem(LEGACY_STORAGE_KEY_V2)
     localStorage.removeItem(LEGACY_STORAGE_KEY)
   }, [design])
 
@@ -747,7 +806,7 @@ export default function App() {
             onClick={() => setMobileSidebarOpen(false)}
             role="presentation"
           />
-          <div className="absolute left-4 top-4 w-[min(24rem,calc(100vw-5rem))] max-h-[calc(100dvh-2rem)]">
+          <div className="absolute left-4 top-4 w-[min(24rem,calc(100vw-5rem))] max-h-[calc(100vh-2rem)]">
             <div className="mb-3 flex justify-end">
               <button
                 type="button"
@@ -758,7 +817,7 @@ export default function App() {
                 <X size={18} />
               </button>
             </div>
-            <div className="max-h-[calc(100dvh-5.5rem)] overflow-y-auto overscroll-contain">
+            <div className="max-h-[calc(100vh-5.5rem)] overflow-y-auto overscroll-contain">
               <Sidebar
                 sections={sections}
                 activeSection={activeSection}

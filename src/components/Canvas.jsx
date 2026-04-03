@@ -99,7 +99,7 @@ export default function Canvas({
         <div
           className="relative aspect-square"
           style={{
-            width: 'min(100%, calc(100dvh - 8rem))',
+            width: 'min(100%, calc(100vh - 8rem))',
             maxWidth: '1120px',
           }}
         >

@@ -19,11 +19,15 @@ body,
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   background: #020617;
+  font-synthesis-weight: none;
+  text-rendering: geometricPrecision;
 }
 
 * {
