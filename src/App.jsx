@@ -7,11 +7,13 @@ import CardStyleControls from './components/CardStyleControls'
 import ElementControls from './components/ElementControls'
 import ExportControls from './components/ExportControls'
 import Sidebar from './components/Sidebar'
+import TemplatesPanel from './components/TemplatesPanel'
 import TextControls from './components/TextControls'
 import ToastStack from './components/ToastStack'
 import ToolbarControls from './components/ToolbarControls'
 import {
   defaultDesign,
+  defaultUserImage,
   fontOptions,
   randomFrom,
   readFileAsDataUrl,
@@ -80,6 +82,7 @@ const randomPalettes = [
     gradientColors: ['#12213f', '#0f766e', '#f0ab3d'],
     gradientDirection: '135deg',
     useThirdColor: true,
+    noise: 8,
     overlay: 'dark',
   },
   {
@@ -88,6 +91,7 @@ const randomPalettes = [
     gradientColors: ['#0f172a', '#2563eb', '#e2e8f0'],
     gradientDirection: 'to right',
     useThirdColor: false,
+    noise: 4,
     overlay: 'light',
   },
   {
@@ -96,6 +100,7 @@ const randomPalettes = [
     gradientColors: ['#3f1d38', '#bc4749', '#f2e8cf'],
     gradientDirection: '45deg',
     useThirdColor: true,
+    noise: 10,
     overlay: 'none',
   },
 ]
@@ -181,6 +186,7 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false)
   const [toasts, setToasts] = useState([])
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const [isFocusMode, setIsFocusMode] = useState(false)
   const [contextMenu, setContextMenu] = useState({
     visible: false,
     position: { x: 0, y: 0 },
@@ -400,6 +406,93 @@ export default function App() {
     pushToast('Image layer added', 'The uploaded image is now on the card.')
   }
 
+  function addShotElement() {
+    const id = `image-shot-${Date.now()}`
+
+    commitChange((current) => ({
+      ...current,
+      elements: [
+        ...current.elements,
+        {
+          id,
+          type: 'image',
+          src: defaultUserImage,
+          alt: 'Shot placeholder',
+          x: 58,
+          y: 18,
+          width: 18,
+          height: 24,
+          radius: 18,
+          resizeMode: 'ratio',
+        },
+      ],
+    }))
+
+    setSelectedId(id)
+    setActiveSection('elements')
+    pushToast('Shot added', 'A starter shot placeholder is ready on the canvas.')
+  }
+
+  function applyPlaceholderTemplate(templateId) {
+    const templates = {
+      'template-1': {
+        background: {
+          mode: 'preset',
+          type: 'gradient',
+          gradientColors: ['#182036', '#164e63', '#f59e0b'],
+          gradientDirection: '135deg',
+          useThirdColor: true,
+          customBackground: '',
+          noise: 8,
+          opacity: 1,
+          overlay: 'dark',
+        },
+      },
+      'template-2': {
+        background: {
+          mode: 'preset',
+          type: 'gradient',
+          gradientColors: ['#0f172a', '#334155', '#d6d3d1'],
+          gradientDirection: 'to right',
+          useThirdColor: true,
+          customBackground: '',
+          noise: 4,
+          opacity: 1,
+          overlay: 'light',
+        },
+      },
+      'template-3': {
+        background: {
+          mode: 'preset',
+          type: 'gradient',
+          gradientColors: ['#431407', '#9f1239', '#f97316'],
+          gradientDirection: '45deg',
+          useThirdColor: true,
+          customBackground: '',
+          noise: 10,
+          opacity: 1,
+          overlay: 'dark',
+        },
+      },
+    }
+
+    const nextTemplate = templates[templateId]
+
+    if (!nextTemplate) {
+      return
+    }
+
+    commitChange((current) => ({
+      ...current,
+      background: {
+        ...current.background,
+        ...nextTemplate.background,
+      },
+    }))
+
+    pushToast('Template applied', 'Placeholder template styling is now on the card.')
+  }
+
   function openQuickImagePicker() {
     quickImageInputRef.current?.click()
   }
@@ -412,7 +505,12 @@ export default function App() {
     }
 
     const dataUrl = await readFileAsDataUrl(file)
-    updateSection('background', { image: dataUrl, type: 'image' })
+    updateSection('background', {
+      mode: 'custom',
+      image: dataUrl,
+      type: 'image',
+      customBackground: '',
+    })
     event.target.value = ''
     pushToast('Background updated', 'Your new background image has been applied.')
   }
@@ -692,6 +790,12 @@ export default function App() {
         />
       ),
     },
+    {
+      id: 'templates',
+      title: 'Templates',
+      subtitle: 'Placeholder starter presets you can replace later',
+      content: <TemplatesPanel onApplyPlaceholder={applyPlaceholderTemplate} />,
+    },
   ]
 
   return (
@@ -725,9 +829,15 @@ export default function App() {
 
         <section
           id="workspace"
-          className="grid min-h-[calc(100vh-2rem)] items-stretch gap-5 lg:h-[calc(100vh-2rem)] lg:grid-cols-[380px_minmax(0,1fr)]"
+          className={`grid min-h-[calc(100vh-2rem)] items-stretch gap-5 lg:h-[calc(100vh-2rem)] ${
+            isFocusMode ? 'lg:grid-cols-[minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'
+          }`}
         >
-          <div className="hidden min-h-0 lg:block lg:h-[calc(100%+6.5rem)]">
+          <div
+            className={`min-h-0 ${
+              isFocusMode ? 'hidden' : 'hidden lg:block lg:h-[calc(100%+3.5rem)]'
+            }`}
+          >
             <Sidebar
               sections={sections}
               activeSection={activeSection}
@@ -737,7 +847,7 @@ export default function App() {
             />
           </div>
 
-          <section className="flex min-h-0 min-w-0 flex-col gap-5 lg:h-full">
+          <section className="flex min-h-0 min-w-0 flex-col gap-4 lg:h-full">
             <div className="sticky left-0 top-6 z-40 flex lg:hidden">
               <button
                 type="button"
@@ -747,20 +857,6 @@ export default function App() {
               >
                 <Menu size={20} />
               </button>
-            </div>
-
-            <div className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-4 shadow-panel backdrop-blur-sm">
-              <ToolbarControls
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                canUndo={history.past.length > 0}
-                canRedo={history.future.length > 0}
-                onRandomize={randomizeDesign}
-                onBringForward={() => reorderSelected('forward')}
-                onSendBackward={() => reorderSelected('backward')}
-                canLayer={Boolean(selectedElement)}
-                onExport={exportCard}
-              />
             </div>
 
             <div className="min-h-0 flex-1">
@@ -785,6 +881,23 @@ export default function App() {
                 onDeleteSelected={deleteSelectedElement}
                 onBringForward={() => reorderSelected('forward')}
                 onSendBackward={() => reorderSelected('backward')}
+                toolbarContent={
+                  <ToolbarControls
+                    orientation="vertical"
+                    onUndo={handleUndo}
+                    onRedo={handleRedo}
+                    canUndo={history.past.length > 0}
+                    canRedo={history.future.length > 0}
+                    onRandomize={randomizeDesign}
+                    onBringForward={() => reorderSelected('forward')}
+                    onSendBackward={() => reorderSelected('backward')}
+                    canLayer={Boolean(selectedElement)}
+                    onExport={exportCard}
+                    onAddShot={addShotElement}
+                    onToggleFocusMode={() => setIsFocusMode((current) => !current)}
+                    isFocusMode={isFocusMode}
+                  />
+                }
               />
             </div>
           </section>

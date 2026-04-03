@@ -1,5 +1,7 @@
 import defaultUserImage from './assets/cardnova-user.png'
 
+export { defaultUserImage }
+
 export const fontOptions = [
   { label: 'System UI', value: '"Segoe UI", Arial, Helvetica, sans-serif' },
   { label: 'Sora', value: 'Sora, sans-serif' },
@@ -39,13 +41,16 @@ export const cardRatioOptions = [
 
 export const defaultDesign = {
   background: {
+    mode: 'preset',
     type: 'gradient',
     solidColor: '#5b4f85',
     gradientColors: ['#484480', '#704a79', '#b74a43'],
     gradientDirection: '115deg',
     useThirdColor: true,
+    customBackground: '',
     image: '',
     blur: 0,
+    noise: 0,
     overlay: 'none',
     opacity: 1,
   },

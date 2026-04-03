@@ -4,6 +4,13 @@ import FloatingContextMenu from './FloatingContextMenu'
 import { cardRatioOptions, getShadowClass } from '../utils'
 
 function getBackgroundStyle(background) {
+  if (background.customBackground) {
+    return {
+      background: background.customBackground,
+      opacity: background.opacity,
+    }
+  }
+
   if (background.type === 'gradient') {
     const colors = background.useThirdColor
       ? background.gradientColors
@@ -44,6 +51,22 @@ function getOverlayClass(overlay) {
   return ''
 }
 
+function getNoiseStyle(intensity = 0) {
+  const opacity = Math.max(0, Math.min(intensity / 100, 0.55))
+
+  return {
+    opacity,
+    backgroundImage: `
+      radial-gradient(rgba(22,22,22,0.28) 0.7px, transparent 0.9px),
+      radial-gradient(rgba(255,255,255,0.18) 0.55px, transparent 0.8px),
+      linear-gradient(0deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04))
+    `,
+    backgroundPosition: '0 0, 11px 9px, 0 0',
+    backgroundSize: '12px 12px, 17px 17px, 100% 100%',
+    mixBlendMode: 'multiply',
+  }
+}
+
 export default function Canvas({
   design,
   selectedId,
@@ -63,6 +86,7 @@ export default function Canvas({
   onDeleteSelected,
   onBringForward,
   onSendBackward,
+  toolbarContent,
 }) {
   const backgroundStyle = getBackgroundStyle(design.background)
   const selectedRatio =
@@ -95,12 +119,17 @@ export default function Canvas({
   }
 
   return (
-    <div className="flex min-h-[30rem] flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/60 bg-white/50 p-4 shadow-panel backdrop-blur-xl lg:p-5">
+    <div className="relative flex min-h-[38rem] flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/50 bg-[#f7efe1] p-2 shadow-panel backdrop-blur-xl lg:min-h-0 lg:p-3">
+        {toolbarContent ? (
+          <div className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-[1.6rem] bg-transparent p-1 lg:left-3">
+            {toolbarContent}
+          </div>
+        ) : null}
         <div
           className="relative aspect-square"
           style={{
-            width: 'min(100%, calc(100vh - 8rem))',
-            maxWidth: '1120px',
+            width: 'min(100%, calc(100vh - 1.75rem))',
+            maxWidth: '1320px',
           }}
         >
         <div
@@ -160,6 +189,13 @@ export default function Canvas({
 
           {design.background.overlay !== 'none' ? (
             <div className={`pointer-events-none absolute inset-0 ${getOverlayClass(design.background.overlay)}`} />
+          ) : null}
+
+          {(design.background.noise ?? 0) > 0 ? (
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={getNoiseStyle(design.background.noise)}
+            />
           ) : null}
 
           <div
