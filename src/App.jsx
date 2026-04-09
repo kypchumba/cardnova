@@ -146,6 +146,14 @@ function loadInitialDesign() {
   }
 }
 
+function getIsPortraitViewport() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return window.innerHeight > window.innerWidth
+}
+
 function createExportClone(sourceNode, width, height) {
   const exportRoot = document.createElement('div')
   exportRoot.style.position = 'fixed'
@@ -186,6 +194,7 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false)
   const [toasts, setToasts] = useState([])
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [isPortraitViewport, setIsPortraitViewport] = useState(getIsPortraitViewport)
   const [contextMenu, setContextMenu] = useState({
     visible: false,
     position: { x: 0, y: 0 },
@@ -214,6 +223,16 @@ export default function App() {
       }
     }
   }, [design.elements, selectedId, editingTextId])
+
+  useEffect(() => {
+    function handleResize() {
+      setIsPortraitViewport(getIsPortraitViewport())
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     function handlePointerDown() {
@@ -797,10 +816,11 @@ export default function App() {
     },
   ]
 
-  function renderToolbar(orientation = 'horizontal') {
+  function renderToolbar(orientation = 'horizontal', theme = 'light') {
     return (
       <ToolbarControls
         orientation={orientation}
+        theme={theme}
         onUndo={handleUndo}
         onRedo={handleRedo}
         canUndo={history.past.length > 0}
@@ -816,6 +836,8 @@ export default function App() {
       />
     )
   }
+
+  const usePortraitWorkspace = isPortraitViewport && !isFocusMode
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-4 text-white lg:px-6">
@@ -855,15 +877,23 @@ export default function App() {
 
         <section
           id="workspace"
-          className={`grid min-h-[100svh] grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch gap-3 lg:h-[calc(100vh-2rem)] lg:grid-rows-1 lg:gap-5 ${
-            isFocusMode ? 'lg:grid-cols-[minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'
+          className={`grid items-stretch ${
+            usePortraitWorkspace
+              ? 'min-h-[100svh] grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2'
+              : `h-[calc(100vh-2rem)] min-h-[calc(100vh-2rem)] gap-5 ${
+                  isFocusMode
+                    ? 'grid-cols-[minmax(0,1fr)]'
+                    : 'grid-cols-[360px_72px_minmax(0,1fr)]'
+                }`
           }`}
         >
           <div
             className={`min-h-0 ${
-              isFocusMode
+              usePortraitWorkspace
+                ? 'row-start-3 row-end-4 h-full overflow-hidden'
+                : isFocusMode
                 ? 'hidden'
-                : 'row-start-3 row-end-4 h-full overflow-hidden lg:row-auto lg:block lg:h-[calc(100%+3.5rem)]'
+                : 'h-full overflow-hidden'
             }`}
           >
             <Sidebar
@@ -872,10 +902,23 @@ export default function App() {
               onSectionChange={(sectionId) =>
                 setActiveSection((current) => (current === sectionId ? null : sectionId))
               }
+              layout={usePortraitWorkspace ? 'horizontal' : 'vertical'}
             />
           </div>
 
-          <section className="row-start-1 row-end-2 flex min-h-0 min-w-0 flex-col lg:row-auto lg:h-full">
+          {!usePortraitWorkspace && !isFocusMode ? (
+            <div className="relative z-30 flex h-full items-center justify-center overflow-visible">
+              <div className="relative z-30 flex h-full w-full items-center justify-center overflow-visible rounded-[2rem] bg-transparent">
+                {renderToolbar('vertical', 'dark')}
+              </div>
+            </div>
+          ) : null}
+
+          <section
+            className={`flex min-h-0 min-w-0 flex-col ${
+              usePortraitWorkspace ? 'row-start-1 row-end-2' : 'h-full'
+            }`}
+          >
             <div className="min-h-0 flex-1">
               <Canvas
                 design={design}
@@ -898,13 +941,13 @@ export default function App() {
                 onDeleteSelected={deleteSelectedElement}
                 onBringForward={() => reorderSelected('forward')}
                 onSendBackward={() => reorderSelected('backward')}
-                toolbarContent={renderToolbar('vertical')}
+                portraitMode={usePortraitWorkspace}
               />
             </div>
           </section>
 
-          {!isFocusMode ? (
-            <div className="row-start-2 row-end-3 flex items-center justify-center py-1 lg:hidden">
+          {usePortraitWorkspace ? (
+            <div className="row-start-2 row-end-3 flex items-center justify-center py-1">
               <div className="w-full overflow-x-auto rounded-[1.75rem] border border-white/10 bg-white/92 px-2 py-2 shadow-panel backdrop-blur">
                 {renderToolbar()}
               </div>

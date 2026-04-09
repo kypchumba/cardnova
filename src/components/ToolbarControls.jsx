@@ -8,13 +8,20 @@ function IconAction({
   active = false,
   accent = 'default',
   tooltipPosition = 'right',
+  theme = 'light',
 }) {
   const accentClass =
-    accent === 'primary'
-      ? 'text-slate-950 hover:text-slate-700'
-      : active
+    theme === 'dark'
+      ? accent === 'primary'
+        ? 'text-white hover:text-slate-200'
+        : active
+          ? 'text-white hover:text-slate-200'
+          : 'text-slate-100 hover:text-white'
+      : accent === 'primary'
         ? 'text-slate-950 hover:text-slate-700'
-        : 'text-slate-900 hover:text-slate-700'
+        : active
+          ? 'text-slate-950 hover:text-slate-700'
+          : 'text-slate-900 hover:text-slate-700'
   const tooltipClass =
     tooltipPosition === 'top'
       ? 'bottom-full left-1/2 mb-3 -translate-x-1/2'
@@ -52,6 +59,7 @@ export default function ToolbarControls({
   onToggleFocusMode,
   isFocusMode,
   orientation = 'horizontal',
+  theme = 'light',
 }) {
   const tooltipPosition = orientation === 'vertical' ? 'right' : 'top'
 
@@ -68,6 +76,7 @@ export default function ToolbarControls({
         label="Add Shot"
         onClick={onAddShot}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Undo2}
@@ -75,6 +84,7 @@ export default function ToolbarControls({
         onClick={onUndo}
         disabled={!canUndo}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Redo2}
@@ -82,12 +92,14 @@ export default function ToolbarControls({
         onClick={onRedo}
         disabled={!canRedo}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Shuffle}
         label="Random Style"
         onClick={onRandomize}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Layers3}
@@ -95,6 +107,7 @@ export default function ToolbarControls({
         onClick={onBringForward}
         disabled={!canLayer}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Layers3}
@@ -102,6 +115,7 @@ export default function ToolbarControls({
         onClick={onSendBackward}
         disabled={!canLayer}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Focus}
@@ -109,6 +123,7 @@ export default function ToolbarControls({
         onClick={onToggleFocusMode}
         active={isFocusMode}
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
       <IconAction
         icon={Download}
@@ -116,6 +131,7 @@ export default function ToolbarControls({
         onClick={onExport}
         accent="primary"
         tooltipPosition={tooltipPosition}
+        theme={theme}
       />
     </div>
   )

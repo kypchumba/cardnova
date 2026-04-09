@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import DraggableImage from './DraggableImage'
 import DraggableText from './DraggableText'
 import FloatingContextMenu from './FloatingContextMenu'
@@ -81,7 +82,7 @@ export default function Canvas({
   onDeleteSelected,
   onBringForward,
   onSendBackward,
-  toolbarContent,
+  portraitMode = false,
 }) {
   const backgroundStyle = getBackgroundStyle(design.background)
   const selectedRatio =
@@ -95,36 +96,64 @@ export default function Canvas({
     design.card.layout === 'vertical'
       ? selectedRatio.width
       : selectedRatio.height
-  const ratioValue = `${ratioWidth} / ${ratioHeight}`
-  const fitCardStyle =
-    ratioWidth >= ratioHeight
-      ? {
-          width: '100%',
-          height: 'auto',
-          aspectRatio: ratioValue,
-        }
-      : {
-          width: 'auto',
-          height: '100%',
-          aspectRatio: ratioValue,
-        }
+  const previewAreaRef = useRef(null)
+  const [previewBounds, setPreviewBounds] = useState({ width: 0, height: 0 })
+
+  useLayoutEffect(() => {
+    const node = previewAreaRef.current
+
+    if (!node) {
+      return undefined
+    }
+
+    function updateBounds() {
+      setPreviewBounds({
+        width: node.clientWidth,
+        height: node.clientHeight,
+      })
+    }
+
+    updateBounds()
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateBounds()
+    })
+
+    resizeObserver.observe(node)
+    window.addEventListener('resize', updateBounds)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateBounds)
+    }
+  }, [])
+
+  const availableWidth = Math.max(previewBounds.width, 1)
+  const availableHeight = Math.max(previewBounds.height, 1)
+  const scale = Math.min(availableWidth / ratioWidth, availableHeight / ratioHeight)
+  const fittedCardWidth = Math.max(1, Math.floor(ratioWidth * scale))
+  const fittedCardHeight = Math.max(1, Math.floor(ratioHeight * scale))
 
   function isBlankCanvasEventTarget(target) {
     return !(target instanceof Element) || !target.closest('[data-layer-root="true"]')
   }
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/50 bg-[#f7efe1] p-2 shadow-panel backdrop-blur-xl lg:p-3">
-        {toolbarContent ? (
-          <div className="absolute left-2 top-1/2 z-20 hidden -translate-y-1/2 rounded-[1.6rem] bg-transparent p-1 lg:left-3 lg:block">
-            {toolbarContent}
-          </div>
-        ) : null}
+    <div
+      className={`relative flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden ${
+        portraitMode
+          ? 'bg-transparent p-0'
+          : 'rounded-[2rem] border border-white/50 bg-[#f7efe1] p-3 shadow-panel backdrop-blur-xl'
+      }`}
+    >
         <div
-          className="relative aspect-square"
+          className={`relative ${
+            portraitMode
+              ? 'h-full w-full'
+              : 'h-full w-full'
+          }`}
+          ref={previewAreaRef}
           style={{
-            width: 'min(100%, calc(100vh - 1.75rem))',
-            maxWidth: '1320px',
             maxHeight: '100%',
           }}
         >
@@ -152,13 +181,12 @@ export default function Canvas({
             design.card.shadow,
           )}`}
           style={{
-            ...fitCardStyle,
             borderRadius: `${design.card.borderRadius}px`,
+            width: `${fittedCardWidth}px`,
+            height: `${fittedCardHeight}px`,
             position: 'absolute',
             inset: '50% auto auto 50%',
             transform: 'translate(-50%, -50%)',
-            maxWidth: '100%',
-            maxHeight: '100%',
           }}
         >
           <div
