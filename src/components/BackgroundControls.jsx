@@ -410,7 +410,7 @@ export default function BackgroundControls({ background, onChange, onImageUpload
         <input
           type="range"
           min="0"
-          max="30"
+          max="100"
           value={background.noise ?? 0}
           onChange={(event) => onChange({ noise: Number(event.target.value) })}
           className="w-full accent-cyan-300"

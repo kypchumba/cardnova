@@ -52,18 +52,13 @@ function getOverlayClass(overlay) {
 }
 
 function getNoiseStyle(intensity = 0) {
-  const opacity = Math.max(0, Math.min(intensity / 100, 0.55))
+  const clampedIntensity = Math.max(0, Math.min(intensity, 100))
+  const normalizedIntensity = clampedIntensity / 100
+  const contrast = 1.1 + normalizedIntensity * 3.4
+  const brightness = 1.01 + normalizedIntensity * 0.12
 
   return {
-    opacity,
-    backgroundImage: `
-      radial-gradient(rgba(22,22,22,0.28) 0.7px, transparent 0.9px),
-      radial-gradient(rgba(255,255,255,0.18) 0.55px, transparent 0.8px),
-      linear-gradient(0deg, rgba(255,255,255,0.04), rgba(255,255,255,0.04))
-    `,
-    backgroundPosition: '0 0, 11px 9px, 0 0',
-    backgroundSize: '12px 12px, 17px 17px, 100% 100%',
-    mixBlendMode: 'multiply',
+    filter: `contrast(${contrast}) brightness(${brightness})`,
   }
 }
 
@@ -119,9 +114,9 @@ export default function Canvas({
   }
 
   return (
-    <div className="relative flex min-h-[38rem] flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/50 bg-[#f7efe1] p-2 shadow-panel backdrop-blur-xl lg:min-h-0 lg:p-3">
+    <div className="relative flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[2rem] border border-white/50 bg-[#f7efe1] p-2 shadow-panel backdrop-blur-xl lg:p-3">
         {toolbarContent ? (
-          <div className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-[1.6rem] bg-transparent p-1 lg:left-3">
+          <div className="absolute left-2 top-1/2 z-20 hidden -translate-y-1/2 rounded-[1.6rem] bg-transparent p-1 lg:left-3 lg:block">
             {toolbarContent}
           </div>
         ) : null}
@@ -130,6 +125,7 @@ export default function Canvas({
           style={{
             width: 'min(100%, calc(100vh - 1.75rem))',
             maxWidth: '1320px',
+            maxHeight: '100%',
           }}
         >
         <div
@@ -191,13 +187,6 @@ export default function Canvas({
             <div className={`pointer-events-none absolute inset-0 ${getOverlayClass(design.background.overlay)}`} />
           ) : null}
 
-          {(design.background.noise ?? 0) > 0 ? (
-            <div
-              className="pointer-events-none absolute inset-0"
-              style={getNoiseStyle(design.background.noise)}
-            />
-          ) : null}
-
           <div
             className="absolute inset-0"
             style={{
@@ -238,6 +227,74 @@ export default function Canvas({
           {design.export.watermark ? (
             <div className="pointer-events-none absolute bottom-4 right-5 rounded-full bg-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white backdrop-blur-md">
               Crafted in Studio Card
+            </div>
+          ) : null}
+
+          {(design.background.noise ?? 0) > 0 ? (
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <svg
+                className="absolute inset-0 h-full w-full"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                style={{
+                  ...getNoiseStyle(design.background.noise),
+                  opacity: 0.05 + design.background.noise / 240,
+                  mixBlendMode: 'screen',
+                }}
+                aria-hidden="true"
+              >
+                <filter id="card-grain-filter-light">
+                  <feTurbulence
+                    type="fractalNoise"
+                    baseFrequency="1.65"
+                    numOctaves="2"
+                    seed="7"
+                    stitchTiles="stitch"
+                  />
+                  <feColorMatrix type="saturate" values="0" />
+                  <feComponentTransfer>
+                    <feFuncA type="table" tableValues="0 0.3 0.75 1" />
+                  </feComponentTransfer>
+                </filter>
+                <rect
+                  width="100%"
+                  height="100%"
+                  fill="white"
+                  filter="url(#card-grain-filter-light)"
+                />
+              </svg>
+
+              <svg
+                className="absolute inset-0 h-full w-full"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+                style={{
+                  ...getNoiseStyle(design.background.noise),
+                  opacity: 0.04 + design.background.noise / 260,
+                  mixBlendMode: 'multiply',
+                }}
+                aria-hidden="true"
+              >
+                <filter id="card-grain-filter-dark">
+                  <feTurbulence
+                    type="fractalNoise"
+                    baseFrequency="1.8"
+                    numOctaves="2"
+                    seed="11"
+                    stitchTiles="stitch"
+                  />
+                  <feColorMatrix type="saturate" values="0" />
+                  <feComponentTransfer>
+                    <feFuncA type="table" tableValues="0 0.26 0.7 1" />
+                  </feComponentTransfer>
+                </filter>
+                <rect
+                  width="100%"
+                  height="100%"
+                  fill="black"
+                  filter="url(#card-grain-filter-dark)"
+                />
+              </svg>
             </div>
           ) : null}
 

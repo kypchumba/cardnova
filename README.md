@@ -206,8 +206,6 @@ Cardnova uses a premium SaaS-inspired interface with:
 ## Future Improvements
 
 - More export formats such as JPEG and PDF
-- Template presets
 - Multi-card design pages
-- Snap guides and alignment helpers
 - Optional cloud save
 

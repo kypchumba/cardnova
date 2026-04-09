@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, startTransition } from 'react'
 import { toBlob } from 'html-to-image'
-import { ArrowDown, Menu, X } from 'lucide-react'
+import { ArrowDown } from 'lucide-react'
 import BackgroundControls from './components/BackgroundControls'
 import Canvas from './components/Canvas'
 import CardStyleControls from './components/CardStyleControls'
@@ -185,7 +185,6 @@ export default function App() {
   const [history, setHistory] = useState({ past: [], future: [] })
   const [isExporting, setIsExporting] = useState(false)
   const [toasts, setToasts] = useState([])
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
   const [contextMenu, setContextMenu] = useState({
     visible: false,
@@ -798,6 +797,26 @@ export default function App() {
     },
   ]
 
+  function renderToolbar(orientation = 'horizontal') {
+    return (
+      <ToolbarControls
+        orientation={orientation}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={history.past.length > 0}
+        canRedo={history.future.length > 0}
+        onRandomize={randomizeDesign}
+        onBringForward={() => reorderSelected('forward')}
+        onSendBackward={() => reorderSelected('backward')}
+        canLayer={Boolean(selectedElement)}
+        onExport={exportCard}
+        onAddShot={addShotElement}
+        onToggleFocusMode={() => setIsFocusMode((current) => !current)}
+        isFocusMode={isFocusMode}
+      />
+    )
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-4 text-white lg:px-6">
       <ToastStack toasts={toasts} />
@@ -810,9 +829,16 @@ export default function App() {
             <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white lg:text-5xl">
               Design a polished card in real time
             </h1>
+            <h1 className="mt-2 text-2xl font-extrabold text-white">
+              Build the workspace your way
+            </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-base">
               Drag text and images anywhere inside the canvas, fine-tune every
               layer and export the finished card exactly as it appears.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Keep the preview large, move fast between controls, and fine-tune
+              every layer without losing sight of the card.
             </p>
           </div>
 
@@ -829,13 +855,15 @@ export default function App() {
 
         <section
           id="workspace"
-          className={`grid min-h-[calc(100vh-2rem)] items-stretch gap-5 lg:h-[calc(100vh-2rem)] ${
+          className={`grid min-h-[100svh] grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)] items-stretch gap-3 lg:h-[calc(100vh-2rem)] lg:grid-rows-1 lg:gap-5 ${
             isFocusMode ? 'lg:grid-cols-[minmax(0,1fr)]' : 'lg:grid-cols-[360px_minmax(0,1fr)]'
           }`}
         >
           <div
             className={`min-h-0 ${
-              isFocusMode ? 'hidden' : 'hidden lg:block lg:h-[calc(100%+3.5rem)]'
+              isFocusMode
+                ? 'hidden'
+                : 'row-start-3 row-end-4 h-full overflow-hidden lg:row-auto lg:block lg:h-[calc(100%+3.5rem)]'
             }`}
           >
             <Sidebar
@@ -847,18 +875,7 @@ export default function App() {
             />
           </div>
 
-          <section className="flex min-h-0 min-w-0 flex-col gap-4 lg:h-full">
-            <div className="sticky left-0 top-6 z-40 flex lg:hidden">
-              <button
-                type="button"
-                onClick={() => setMobileSidebarOpen(true)}
-                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white bg-white text-slate-900 shadow-panel"
-                aria-label="Open settings"
-              >
-                <Menu size={20} />
-              </button>
-            </div>
-
+          <section className="row-start-1 row-end-2 flex min-h-0 min-w-0 flex-col lg:row-auto lg:h-full">
             <div className="min-h-0 flex-1">
               <Canvas
                 design={design}
@@ -881,26 +898,18 @@ export default function App() {
                 onDeleteSelected={deleteSelectedElement}
                 onBringForward={() => reorderSelected('forward')}
                 onSendBackward={() => reorderSelected('backward')}
-                toolbarContent={
-                  <ToolbarControls
-                    orientation="vertical"
-                    onUndo={handleUndo}
-                    onRedo={handleRedo}
-                    canUndo={history.past.length > 0}
-                    canRedo={history.future.length > 0}
-                    onRandomize={randomizeDesign}
-                    onBringForward={() => reorderSelected('forward')}
-                    onSendBackward={() => reorderSelected('backward')}
-                    canLayer={Boolean(selectedElement)}
-                    onExport={exportCard}
-                    onAddShot={addShotElement}
-                    onToggleFocusMode={() => setIsFocusMode((current) => !current)}
-                    isFocusMode={isFocusMode}
-                  />
-                }
+                toolbarContent={renderToolbar('vertical')}
               />
             </div>
           </section>
+
+          {!isFocusMode ? (
+            <div className="row-start-2 row-end-3 flex items-center justify-center py-1 lg:hidden">
+              <div className="w-full overflow-x-auto rounded-[1.75rem] border border-white/10 bg-white/92 px-2 py-2 shadow-panel backdrop-blur">
+                {renderToolbar()}
+              </div>
+            </div>
+          ) : null}
         </section>
       </div>
 
@@ -911,37 +920,6 @@ export default function App() {
         className="hidden"
         onChange={addImageElement}
       />
-
-      {mobileSidebarOpen ? (
-        <div className="fixed inset-0 z-50 bg-slate-950/28 backdrop-blur-[2px] lg:hidden">
-          <div
-            className="absolute inset-0"
-            onClick={() => setMobileSidebarOpen(false)}
-            role="presentation"
-          />
-          <div className="absolute left-4 top-4 w-[min(24rem,calc(100vw-5rem))] max-h-[calc(100vh-2rem)]">
-            <div className="mb-3 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setMobileSidebarOpen(false)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white bg-white text-slate-900 shadow-panel"
-                aria-label="Close settings"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="max-h-[calc(100vh-5.5rem)] overflow-y-auto overscroll-contain">
-              <Sidebar
-                sections={sections}
-                activeSection={activeSection}
-                onSectionChange={(sectionId) =>
-                  setActiveSection((current) => (current === sectionId ? null : sectionId))
-                }
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
     </main>
   )
 }
