@@ -11,31 +11,31 @@ function Field({ label, children }) {
 }
 
 const solidPalette = [
-  ['Ivory Glow', '#f4efe6'],
-  ['Sandstone', '#dfd1bf'],
-  ['Clay Dust', '#c8a98d'],
-  ['Peach Skin', '#f3cbb5'],
-  ['Rose Powder', '#f0c7cf'],
-  ['Berry Cream', '#dca4b8'],
+  ['Red', '#ff0000'],
+  ['Orange', '#ffd900'],
+  ['Yellow', 'rgb(255, 255, 0)'],
+  ['Green', '#0dff00'],
+  ['Blue', '#0011ff'],
+  ['crayan', '#00f2ff'],
   ['Soft Lilac', '#d8c7f3'],
-  ['Lavender Mist', '#c5b4e3'],
-  ['Sky Milk', '#d7e7f7'],
+  ['Pink', '#ff008c'],
+  ['Purple', '#6500bd'],
   ['Powder Blue', '#b5d0eb'],
-  ['Ice Mint', '#dff5ef'],
-  ['Aqua Glass', '#c7ece6'],
-  ['Sage Whisper', '#d8e2c9'],
-  ['Olive Haze', '#b7c39a'],
-  ['Lemon Wash', '#f5efb8'],
+  ['Ice Mint', '#00ffbb'],
+  ['Aqua Glass', '#c7cdec'],
+  ['Caramel', '#2E1F26'],
+  ['Wattle', '#CCDA47'],
+  ['Dark Slate Gray', '#0A4A3C'],
   ['Amber Dust', '#e8c47f'],
   ['Coral Light', '#efb1a3'],
   ['Terracotta Soft', '#c98d78'],
-  ['Stone Fog', '#d6d2cf'],
-  ['Cloud Silver', '#bcc3cd'],
-  ['Midnight Ink', '#192131'],
-  ['Deep Ocean', '#132c45'],
-  ['Forest Room', '#1b332a'],
+  ['White', '#ffffff'],
+  ['Black', '#000000'],
+  ['Raisin', '#C87740'],
+  ['Alabaster', '#8B004A'],
+  ['Khaki Orange', '#F2B759'],
   ['Plum Night', '#30203b'],
-  ['Cherry Wine', '#4a1f29'],
+  ['Cherry wine', '#4a1f29'],
 ]
 
 const gradientPalette = [
@@ -64,6 +64,7 @@ const gradientPalette = [
   ['Studio Peach', ['#7c2d12', '#fb7185', '#fed7aa']],
   ['Deep Bloom', ['#172554', '#7c3aed', '#f9a8d4']],
   ['Signal Sky', ['#082f49', '#0284c7', '#f0abfc']],
+  ['Bluefade',['#0f03ff', '#bb00ff', '#001adb'] ]
 ]
 
 const obsidianPalette = [
