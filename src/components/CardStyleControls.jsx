@@ -56,36 +56,6 @@ export default function CardStyleControls({ card, onChange }) {
         />
       </Field>
 
-      <Field label="Shadow strength">
-        <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white/[0.06] p-1">
-          {['soft', 'medium', 'strong'].map((shadow) => (
-            <button
-              key={shadow}
-              type="button"
-              onClick={() => onChange({ shadow })}
-              className={`rounded-2xl px-3 py-2 text-sm font-semibold capitalize transition ${
-                card.shadow === shadow
-                  ? 'bg-cyan-300 text-slate-950'
-                  : 'text-slate-200'
-              }`}
-            >
-              {shadow}
-            </button>
-          ))}
-        </div>
-      </Field>
-
-      <Field label={`Inner padding: ${card.padding}px`}>
-        <input
-          type="range"
-          min="12"
-          max="56"
-          value={card.padding}
-          onChange={(event) => onChange({ padding: Number(event.target.value) })}
-          className="w-full accent-cyan-300"
-        />
-      </Field>
-
       <Field label={`Glass transparency: ${Math.round(card.transparency * 100)}%`}>
         <input
           type="range"
