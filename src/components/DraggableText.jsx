@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { clamp } from '../utils'
 
 export default function DraggableText({
   element,
@@ -18,6 +17,7 @@ export default function DraggableText({
   const measureRef = useRef(null)
   const elementRef = useRef(null)
   const caretRef = useRef({ start: null, end: null })
+  const holdTimerRef = useRef(null)
   const [boxSize, setBoxSize] = useState({ width: 32, height: 32 })
 
   useEffect(() => {
@@ -75,18 +75,21 @@ export default function DraggableText({
 
   function getElementBounds() {
     const canvasRect = canvasRef.current?.getBoundingClientRect()
-    const elementRect = elementRef.current?.getBoundingClientRect()
 
-    if (!canvasRect || !elementRect) {
+    if (!canvasRect) {
       return null
     }
 
-    return {
-      canvasRect,
-      widthPercent: (elementRect.width / canvasRect.width) * 100,
-      heightPercent: (elementRect.height / canvasRect.height) * 100,
-    }
+    return { canvasRect }
   }
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) {
+        window.clearTimeout(holdTimerRef.current)
+      }
+    }
+  }, [])
 
   function startMove(event) {
     if (isEditing) {
@@ -104,30 +107,56 @@ export default function DraggableText({
     const startX = event.clientX
     const startY = event.clientY
     const initial = { x: element.x, y: element.y }
+    const isTouchPointer = event.pointerType === 'touch'
     let hasDragged = false
+    let dragArmed = !isTouchPointer
+
+    function clearHoldTimer() {
+      if (holdTimerRef.current) {
+        window.clearTimeout(holdTimerRef.current)
+        holdTimerRef.current = null
+      }
+    }
+
+    if (isTouchPointer) {
+      holdTimerRef.current = window.setTimeout(() => {
+        dragArmed = true
+      }, 240)
+    }
 
     function handleMove(moveEvent) {
+      const movedEnough =
+        Math.abs(moveEvent.clientX - startX) > 6 || Math.abs(moveEvent.clientY - startY) > 6
+
+      if (isTouchPointer && !dragArmed) {
+        if (movedEnough) {
+          clearHoldTimer()
+        }
+        return
+      }
+
       const deltaX = ((moveEvent.clientX - startX) / bounds.canvasRect.width) * 100
       const deltaY = ((moveEvent.clientY - startY) / bounds.canvasRect.height) * 100
-      const movedEnough =
-        Math.abs(moveEvent.clientX - startX) > 3 || Math.abs(moveEvent.clientY - startY) > 3
 
       if (!movedEnough && !hasDragged) {
         return
       }
 
+      moveEvent.preventDefault()
       hasDragged = true
 
       onPreviewChange(element.id, {
-        x: clamp(initial.x + deltaX, 0, 100 - bounds.widthPercent),
-        y: clamp(initial.y + deltaY, 0, 100 - bounds.heightPercent),
+        x: initial.x + deltaX,
+        y: initial.y + deltaY,
       })
     }
 
     function handleUp() {
-      if (!hasDragged) {
+      clearHoldTimer()
+
+      if (!hasDragged && (!isTouchPointer || !dragArmed)) {
         onStartEditing(element.id)
-      } else {
+      } else if (hasDragged) {
         onCommitChange()
       }
       window.removeEventListener('pointermove', handleMove)
@@ -168,6 +197,7 @@ export default function DraggableText({
         fontKerning: 'none',
         fontVariantLigatures: 'none',
         textRendering: 'geometricPrecision',
+        overflow: 'visible',
       }}
     >
       {selected ? (
@@ -253,6 +283,10 @@ export default function DraggableText({
             fontKerning: 'none',
             fontVariantLigatures: 'none',
             textRendering: 'geometricPrecision',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none',
+            touchAction: 'none',
           }}
         >
           {element.text}

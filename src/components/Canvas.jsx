@@ -138,6 +138,15 @@ export default function Canvas({
     return !(target instanceof Element) || !target.closest('[data-layer-root="true"]')
   }
 
+  const sharedCardGeometry = {
+    borderRadius: `${design.card.borderRadius}px`,
+    width: `${fittedCardWidth}px`,
+    height: `${fittedCardHeight}px`,
+    position: 'absolute',
+    inset: '50% auto auto 50%',
+    transform: 'translate(-50%, -50%)',
+  }
+
   return (
     <div
       className={`relative flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden ${
@@ -177,46 +186,46 @@ export default function Canvas({
             event.preventDefault()
             onContextMenu?.(null, event.clientX, event.clientY)
           }}
-          className={`relative overflow-hidden bg-canvas ${getShadowClass(
+          className={`relative overflow-visible bg-canvas ${getShadowClass(
             design.card.shadow,
           )}`}
-          style={{
-            borderRadius: `${design.card.borderRadius}px`,
-            width: `${fittedCardWidth}px`,
-            height: `${fittedCardHeight}px`,
-            position: 'absolute',
-            inset: '50% auto auto 50%',
-            transform: 'translate(-50%, -50%)',
-          }}
+          style={sharedCardGeometry}
         >
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
             style={{
-              ...backgroundStyle,
-              filter:
-                design.background.type !== 'image'
-                  ? `blur(${design.background.blur}px)`
-                  : backgroundStyle.filter,
-              transform:
-                design.background.blur > 0
-                  ? 'scale(1.04)'
-                  : backgroundStyle.transform,
+              borderRadius: `${design.card.borderRadius}px`,
             }}
-          />
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                ...backgroundStyle,
+                filter:
+                  design.background.type !== 'image'
+                    ? `blur(${design.background.blur}px)`
+                    : backgroundStyle.filter,
+                transform:
+                  design.background.blur > 0
+                    ? 'scale(1.04)'
+                    : backgroundStyle.transform,
+              }}
+            />
+
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundColor: `rgba(255,255,255,${design.card.transparency})`,
+              }}
+            />
+
+            {design.background.overlay !== 'none' ? (
+              <div className={`absolute inset-0 ${getOverlayClass(design.background.overlay)}`} />
+            ) : null}
+          </div>
 
           <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundColor: `rgba(255,255,255,${design.card.transparency})`,
-            }}
-          />
-
-          {design.background.overlay !== 'none' ? (
-            <div className={`pointer-events-none absolute inset-0 ${getOverlayClass(design.background.overlay)}`} />
-          ) : null}
-
-          <div
-            className="absolute inset-0"
+            className="absolute inset-0 overflow-visible"
             style={{
               padding: `${design.card.padding}px`,
             }}
@@ -253,8 +262,8 @@ export default function Canvas({
           </div>
 
           {design.export.watermark ? (
-            <div className="pointer-events-none absolute bottom-4 right-5 rounded-full bg-white/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white backdrop-blur-md">
-              Crafted in Studio Card
+            <div className="pointer-events-none absolute bottom-4 right-5 rounded-full bg-white/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-black backdrop-blur-md">
+              Crafted in cardnova studios
             </div>
           ) : null}
 

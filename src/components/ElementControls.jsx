@@ -18,13 +18,6 @@ export default function ElementControls({
 }) {
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white">
-        Press <span className="font-semibold text-cyan-200">Delete</span> to remove
-        the selected layer. <span className="font-semibold text-cyan-200">Backspace</span>{' '}
-        stays available for editing text content. Right-click anywhere on the preview
-        to jump back here.
-      </div>
-
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
@@ -44,7 +37,7 @@ export default function ElementControls({
           <button
             type="button"
             onClick={onDelete}
-            className="w-full rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200"
+            className="w-full rounded-2xl bg-red-500 hover:bg-red-600 transition px-4 py-3 text-sm font-semibold text-white shadow-md"
           >
             Delete Selected Element
           </button>

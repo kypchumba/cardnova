@@ -17,7 +17,7 @@ export default function AccordionSection({
           : 'border-white/10 bg-transparent'
       } ${
         isResponsiveHorizontal
-          ? 'w-[min(84vw,24rem)] shrink-0 lg:w-auto lg:shrink lg:pb-4 lg:last:pb-0'
+          ? 'flex h-full w-[min(84vw,24rem)] shrink-0 flex-col lg:h-auto lg:w-auto lg:shrink lg:pb-4 lg:last:pb-0'
           : isHorizontal
             ? 'w-[min(84vw,24rem)] shrink-0'
             : 'pb-4 last:pb-0'
@@ -58,11 +58,11 @@ export default function AccordionSection({
           isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         }`}
       >
-        <div className="overflow-hidden">
+        <div className={`overflow-hidden ${isResponsiveHorizontal ? 'flex-1' : ''}`}>
           <div
             className={`border-t border-white/10 px-4 py-5 ${
               isResponsiveHorizontal
-                ? 'max-h-[calc(50svh-9rem)] overflow-y-auto lg:max-h-none lg:overflow-visible'
+                ? 'h-full overflow-y-auto lg:h-auto lg:max-h-none lg:overflow-visible'
                 : isHorizontal
                   ? 'max-h-[calc(50svh-9rem)] overflow-y-auto'
                   : ''

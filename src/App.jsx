@@ -204,6 +204,7 @@ export default function App() {
   const quickImageInputRef = useRef(null)
   const designRef = useRef(design)
   const interactionSnapshotRef = useRef(null)
+  const focusHistoryArmedRef = useRef(false)
 
   const selectedElement =
     design.elements.find((element) => element.id === selectedId) ?? null
@@ -263,6 +264,41 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown, true)
   }, [selectedId, design.elements])
 
+  useEffect(() => {
+    if (!isFocusMode) {
+      return undefined
+    }
+
+    function handleEscapeKey(event) {
+      if (event.key !== 'Escape') {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      exitFocusMode()
+    }
+
+    window.addEventListener('keydown', handleEscapeKey, true)
+    return () => window.removeEventListener('keydown', handleEscapeKey, true)
+  }, [isFocusMode, isPortraitViewport])
+
+  useEffect(() => {
+    if (!isFocusMode || !isPortraitViewport) {
+      return undefined
+    }
+
+    window.history.pushState({ cardnovaFocusMode: true }, '')
+    focusHistoryArmedRef.current = true
+
+    function handlePopState() {
+      exitFocusMode({ fromHistory: true })
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [isFocusMode, isPortraitViewport])
+
   function commitChange(updater) {
     setDesign((current) => {
       const next = typeof updater === 'function' ? updater(current) : updater
@@ -274,12 +310,46 @@ export default function App() {
     })
   }
 
-  function pushToast(title, message = '') {
+  function pushToast(title, message = '', duration = 1800) {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     setToasts((current) => [...current, { id, title, message }].slice(-4))
     window.setTimeout(() => {
       setToasts((current) => current.filter((toast) => toast.id !== id))
-    }, 1800)
+    }, duration)
+  }
+
+  function exitFocusMode({ fromHistory = false } = {}) {
+    setIsFocusMode(false)
+
+    if (!focusHistoryArmedRef.current) {
+      return
+    }
+
+    if (fromHistory) {
+      focusHistoryArmedRef.current = false
+      return
+    }
+
+    focusHistoryArmedRef.current = false
+    window.history.back()
+  }
+
+  function enterFocusMode() {
+    setIsFocusMode(true)
+    pushToast(
+      'Press esc to go back',
+      isPortraitViewport ? 'Use your phone back button to leave focus mode.' : '',
+      2600,
+    )
+  }
+
+  function toggleFocusMode() {
+    if (isFocusMode) {
+      exitFocusMode()
+      return
+    }
+
+    enterFocusMode()
   }
 
   function beginInteraction() {
@@ -508,7 +578,7 @@ export default function App() {
       },
     }))
 
-    pushToast('Template applied', 'Placeholder template styling is now on the card.')
+    pushToast('Template applied', 'Template styling applied successfully.')
   }
 
   function openQuickImagePicker() {
@@ -811,7 +881,7 @@ export default function App() {
     {
       id: 'templates',
       title: 'Templates',
-      subtitle: 'Placeholder starter presets you can replace later',
+      subtitle: 'Various starter presets for faster  development',
       content: <TemplatesPanel onApplyPlaceholder={applyPlaceholderTemplate} />,
     },
   ]
@@ -831,7 +901,7 @@ export default function App() {
         canLayer={Boolean(selectedElement)}
         onExport={exportCard}
         onAddShot={addShotElement}
-        onToggleFocusMode={() => setIsFocusMode((current) => !current)}
+        onToggleFocusMode={toggleFocusMode}
         isFocusMode={isFocusMode}
       />
     )
@@ -859,9 +929,12 @@ export default function App() {
               layer and export the finished card exactly as it appears.
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              Keep the preview large, move fast between controls, and fine-tune
+              Keep the preview large, move fast between controls and fine-tune
               every layer without losing sight of the card.
-            </p>
+            </p>                 
+           <p class="inline-block mt-3 text-red-600 bg-red-50 border-l-8 border-red-900 px-4 py-3 rounded text-sm font-medium">
+             <span class="font-bold">Note:</span> Please turn on desktop site when working on mobile for full experience and easy styling.
+           </p>
           </div>
 
           <div className="flex justify-start">
@@ -890,7 +963,7 @@ export default function App() {
           <div
             className={`min-h-0 ${
               usePortraitWorkspace
-                ? 'row-start-3 row-end-4 h-full overflow-hidden'
+                ? 'row-start-3 row-end-4 h-[min(36svh,25rem)] min-h-[18rem] overflow-hidden'
                 : isFocusMode
                 ? 'hidden'
                 : 'h-full overflow-hidden'
@@ -902,7 +975,7 @@ export default function App() {
               onSectionChange={(sectionId) =>
                 setActiveSection((current) => (current === sectionId ? null : sectionId))
               }
-              layout={usePortraitWorkspace ? 'horizontal' : 'vertical'}
+              layout={usePortraitWorkspace ? 'mobile-horizontal' : 'vertical'}
             />
           </div>
 
@@ -948,8 +1021,8 @@ export default function App() {
 
           {usePortraitWorkspace ? (
             <div className="row-start-2 row-end-3 flex items-center justify-center py-1">
-              <div className="w-full overflow-x-auto rounded-[1.75rem] border border-white/10 bg-white/92 px-2 py-2 shadow-panel backdrop-blur">
-                {renderToolbar()}
+              <div className="w-full overflow-x-auto rounded-[1.75rem] border border-white/10 bg-slate-900/88 px-2 py-2 shadow-panel backdrop-blur">
+                {renderToolbar('horizontal', 'dark')}
               </div>
             </div>
           ) : null}

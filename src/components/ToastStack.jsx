@@ -1,6 +1,6 @@
 export default function ToastStack({ toasts }) {
   return (
-    <div className="pointer-events-none fixed right-5 top-5 z-[80] flex w-[min(24rem,calc(100vw-2.5rem))] flex-col gap-3">
+    <div className="pointer-events-none fixed left-1/2 top-5 z-[80] flex w-[min(24rem,calc(100vw-2.5rem))] -translate-x-1/2 flex-col gap-3">
       {toasts.map((toast) => (
         <div
           key={toast.id}

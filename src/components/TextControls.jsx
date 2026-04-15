@@ -72,7 +72,7 @@ export default function TextControls({
                     onGlobalChange({ fontWeight: weight })
                   }
                 }}
-                className={`rounded-2xl px-3 py-2 text-sm font-semibold transition ${
+                className={`rounded-2xl px-1 py-2 text-sm font-semibold transition ${
                   target.fontWeight === weight
                     ? 'bg-cyan-300 text-slate-950'
                     : 'text-slate-200'

@@ -36,7 +36,7 @@ export default function Sidebar({
       <div
         className={`scrollbar-thin ${
           isResponsiveHorizontal
-            ? 'flex gap-4 overflow-x-auto overflow-y-hidden pb-2 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:overflow-x-hidden lg:pr-2 lg:pb-0 lg:min-h-0 lg:flex-1'
+            ? 'flex h-full items-stretch gap-4 overflow-x-auto overflow-y-hidden pb-2 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:overflow-x-hidden lg:pr-2 lg:pb-0 lg:min-h-0 lg:flex-1'
             : isHorizontal
               ? 'flex gap-4 overflow-x-auto overflow-y-hidden pb-2'
             : 'flex flex-col gap-5 overflow-y-auto pr-2 lg:min-h-0 lg:flex-1'

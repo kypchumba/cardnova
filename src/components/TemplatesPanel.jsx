@@ -23,8 +23,7 @@ export default function TemplatesPanel({ onApplyPlaceholder }) {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white">
-        Template slots are ready for your own presets. Edit this section later with
-        your preferred styles, categories, or starter layouts.
+        Hit on apply template to apply the desired template and fine-tune for personal preference. 
       </div>
 
       <div className="space-y-3">
@@ -50,7 +49,7 @@ export default function TemplatesPanel({ onApplyPlaceholder }) {
                 onClick={() => onApplyPlaceholder?.(template.id)}
                 className="inline-flex items-center rounded-full border border-cyan-300/35 bg-cyan-300/12 px-4 py-2 text-sm font-semibold text-cyan-50 transition hover:border-cyan-200/60 hover:bg-cyan-300/20"
               >
-                Apply Placeholder
+                Apply Template
               </button>
             </div>
           </article>
