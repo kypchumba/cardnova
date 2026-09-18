@@ -914,36 +914,39 @@ export default function App() {
       <ToastStack toasts={toasts} />
       <div className="mx-auto flex max-w-[1680px] flex-col gap-6">
         <section className="flex min-h-[calc(100vh-2rem)] flex-col justify-between px-1 pb-4 pt-2">
-          <div className="max-w-4xl pt-16 lg:pt-24">
+          <div className="mx-auto max-w-4xl pt-16 text-center lg:pt-24">
             <p className="font-display text-xs uppercase tracking-[0.36em] text-slate-400">
               Business Card Generator
             </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white lg:text-5xl">
+            <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-white lg:text-5xl">
               Design a polished card in real time
             </h1>
-            <h1 className="mt-2 text-2xl font-extrabold text-white">
+            <h1 className="mt-5 text-2xl font-extrabold text-white">
               Build the workspace your way
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 lg:text-base">
+            <p className="mt-6 max-w-3xl text-sm leading-6 text-slate-300 lg:text-base">
               Drag text and images anywhere inside the canvas, fine-tune every
               layer and export the finished card exactly as it appears.
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
+            <p className="mt-6 text-sm leading-6 text-slate-300">
               Keep the preview large, move fast between controls and fine-tune
               every layer without losing sight of the card.
             </p>                 
-           <p class="inline-block mt-3 text-red-600 bg-red-50 border-l-8 border-red-900 px-4 py-3 rounded text-sm font-medium">
+           <p class="inline-block mt-10 text-red-600 bg-red-50 border-l-8 border-red-900 px-4 py-3 rounded text-sm font-medium">
              <span class="font-bold">Note:</span> Please turn on desktop site when working on mobile for full experience and easy styling.
            </p>
           </div>
 
-          <div className="flex justify-start">
+          <div className="flex justify-center -translate-y-10">
             <a
               href="#workspace"
               className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10"
             >
               Scroll to workspace
-              <ArrowDown size={16} />
+              <ArrowDown
+                size={16}
+                className="animate-bounce"
+              />
             </a>
           </div>
         </section>
