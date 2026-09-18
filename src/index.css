@@ -50,7 +50,7 @@ textarea {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.45);
+  background: rgba(184, 148, 148, 0.45);
   border-radius: 9999px;
 }
 
