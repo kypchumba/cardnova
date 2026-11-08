@@ -152,7 +152,7 @@ export default function Canvas({
       className={`relative flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden ${
         portraitMode
           ? 'bg-transparent p-0'
-          : 'rounded-[2rem] border border-white/50 bg-[#f7efe1] p-3 shadow-panel backdrop-blur-xl'
+          : 'rounded-[2rem] p-3 shadow-panel backdrop-blur-xl'
       }`}
     >
         <div

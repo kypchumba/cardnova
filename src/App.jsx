@@ -521,7 +521,7 @@ export default function App() {
     pushToast('Shot added', 'A starter shot placeholder is ready on the canvas.')
   }
 
-  function applyPlaceholderTemplate(templateId) {
+  function applyTemplate(templateId) {
     const templates = {
       'template-1': {
         background: {
@@ -882,7 +882,7 @@ export default function App() {
       id: 'templates',
       title: 'Templates',
       subtitle: 'Various starter presets for faster  development',
-      content: <TemplatesPanel onApplyPlaceholder={applyPlaceholderTemplate} />,
+      content: <TemplatesPanel onApplyTemplate={applyTemplate} />,
     },
   ]
 
